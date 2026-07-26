@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Postulación de Jurado / Mentor - FaCyT{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto;">
+    <article class="card-custom">
+        <header>
+            <h3>👨‍⚖️ Registro de Jurado / Mentoría Virtual Global</h3>
+            <p style="margin: 0; color: var(--text-muted);">
+                Postulación para la evaluación de jornadas científicas y eventos académicos FaCyT.
+            </p>
+        </header>
+
+        {% if perfil %}
+            <div style="margin-bottom: 20px; padding: 12px; background-color: #f1f5f9; border-radius: 6px;">
+                <strong>Estado de Postulación:</strong> 
+                <mark style="text-transform: uppercase; font-weight: bold;">{{ perfil.estado }}</mark>
+            </div>
+        {% endif %}
+
+        <form action="{{ url_for('postular_jurado') }}" method="POST">
+            <label for="institucion_origen">
+                <strong>Institución de Origen / Universidad:</strong>
+            </label>
+            <input type="text" id="institucion_origen" name="institucion_origen" 
+                   value="{{ perfil.institucion_origen if perfil else '' }}" 
+                   placeholder="Ej. Universidad de Carabobo / Instituto Venezolano de Investigaciones Científicas" required>
+
+            <div class="grid">
+                <div>
+                    <label for="pais">
+                        <strong>País:</strong>
+                    </label>
+                    <input type="text" id="pais" name="pais" 
+                           value="{{ perfil.pais if perfil else '' }}" 
+                           placeholder="Ej. Venezuela" required>
+                </div>
+
+                <div>
+                    <label for="area_especialidad">
+                        <strong>Área de Especialidad:</strong>
+                    </label>
+                    <input type="text" id="area_especialidad" name="area_especialidad" 
+                           value="{{ perfil.area_especialidad if perfil else '' }}" 
+                           placeholder="Ej. Inteligencia Artificial, Biotecnología" required>
+                </div>
+            </div>
+
+            <footer style="margin-top: 20px; text-align: right;">
+                <button type="submit" class="primary">
+                    💾 {% if perfil %}Actualizar Datos de Jurado{% else %}Enviar Postulación{% endif %}
+                </button>
+            </footer>
+        </form>
+    </article>
+</div>
+{% endblock %}

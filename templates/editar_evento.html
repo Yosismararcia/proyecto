@@ -9,13 +9,11 @@
 
     <article>
         <form action="{{ url_for('admin_editar_evento', evento_id=evento.id) }}" method="POST">            
-            <!-- Título -->
             <label for="titulo">
                 Título de la Actividad / Congreso:
                 <input type="text" id="titulo" name="titulo" value="{{ evento.titulo }}" required>
             </label>
 
-            <!-- Tipo de Actividad -->
             <label for="tipo_actividad">
                 Tipo de Actividad:
                 <select id="tipo_actividad" name="tipo_actividad" required>
@@ -28,7 +26,6 @@
                 </select>
             </label>
 
-            <!-- Fecha y Horarios -->
             <div class="grid">
                 <div>
                     <label for="fecha">
@@ -50,7 +47,6 @@
                 </div>
             </div>
 
-            <!-- Espacio Físico -->
             <label for="espacio_id">
                 Espacio Asignado:
                 <select id="espacio_id" name="espacio_id" required>
@@ -62,14 +58,12 @@
                 </select>
             </label>
 
-            <!-- Botones de Acción -->
             <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
                 <a href="/admin" role="button" class="secondary outline" style="margin: 0;">Cancelar</a>
                 <button type="submit" style="margin: 0; background-color: #059669; border-color: #059669; color: white;">
                     Actualizar Cambios
                 </button>
             </div>
-
         </form>
     </article>
 </div>

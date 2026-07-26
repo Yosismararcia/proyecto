@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ evento.titulo }} - SGJC FaCyT{% endblock %}
+
+{% block content %}
+{% set rol_limpio = (session.get('usuario_rol') or session.get('rol') or '')|lower %}
+
+<article class="card-custom">
+    <header>
+        <h3>📌 {{ evento.titulo }}</h3>
+    </header>
+    
+    <div class="grid">
+        <div>
+            <p><strong>📍 Lugar:</strong> {{ evento.espacio_nombre or 'Por definir' }}</p>
+            <p><strong>👤 Ponente / Organizador:</strong> {{ evento.ponente_nombre }}</p>
+        </div>
+        <div>
+            <p><strong>🗓 Fecha:</strong> {{ evento.fecha }}</p>
+            <p><strong>🕒 Horario:</strong> {{ evento.hora_inicio }} - {{ evento.hora_fin }}</p>
+            
+            {% if inscripcion and inscripcion.asistio %}
+                <a href="/evento/{{ evento.id }}/certificado" class="button primary" target="_blank" style="margin-top: 10px;">
+                    📄 Descargar Certificado Digital (PDF + QR)
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</article>
+
+<!-- ========================================================= -->
+<!-- SECCIÓN DE VOLUNTARIADO UNIFICADA                         -->
+<!-- ========================================================= -->
+<hr style="margin: 2rem 0;">
+<section>
+    <h3 style="margin-bottom: 1.5rem;">
+        <i class="fa-solid fa-hands-holding-circle"></i> Oportunidades de Voluntariado
+    </h3>
+    
+    <!-- Formulario para que el Admin/Profesor cree tareas -->
+    {% if rol_limpio in ['admin', 'administrador', 'profesor', 'ponente', 'administrativo'] %}
+    <details style="margin-bottom: 2rem;">
+        <summary role="button" class="secondary outline">
+            <i class="fa-solid fa-plus-circle"></i> Añadir nueva tarea de staff
+        </summary>
+        <article>
+            <form action="{{ url_for('crear_tarea_voluntariado', evento_id=evento.id) }}" method="POST">
+                <div class="grid">
+                    <label>Nombre de la Tarea
+                        <input type="text" name="titulo_tarea" placeholder="Ej: Registro y Protocolo" required>
+                    </label>
+                    <label>Cupos Necesarios
+                        <input type="number" name="cupos_disponibles" placeholder="Ej: 5" required min="1">
+                    </label>
+                    <label>Horas a Acreditar
+                        <input type="number" name="horas_acreditadas" placeholder="Ej: 10" required min="1">
+                    </label>
+                </div>
+                <label>Descripción de las funciones
+                    <textarea name="descripcion" placeholder="Explica brevemente qué hará el estudiante..." required></textarea>
+                </label>
+                <button type="submit">Crear Oportunidad</button>
+            </form>
+        </article>
+    </details>
+    {% endif %}
+
+    <!-- Listado de tareas disponibles con diseño vertical estructurado -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        {% for tarea in tareas %}
+        {% set cupos_max = tarea.cupos_disponibles if tarea.cupos_disponibles is not none else (tarea.cupos_disponibles or 0) %}
+        <article class="card-custom" style="margin-bottom: 0;">
+            <header>
+                <h4 style="margin: 0;">{{ tarea.titulo_tarea or tarea.titulo_tarea }}</h4>
+            </header>
+            
+            <p><small>{{ tarea.descripcion }}</small></p>
+            
+            <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+                <p style="margin: 0;">
+                    <strong><i class="fa-solid fa-clock"></i> Acredita:</strong> {{ tarea.horas_acreditadas }} horas
+                </p>
+                <p style="margin: 0;">
+                    <strong><i class="fa-solid fa-users"></i> Cupos:</strong> {{ tarea.ocupados or 0 }} / {{ cupos_max }}
+                </p>
+            </div>
+
+            <!-- VISTA PARA ESTUDIANTES -->
+            {% if rol_limpio in ['estudiante', 'student'] %}
+                <footer style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color, #e2e8f0);">
+                    {% if tarea.mi_estado == 'postulado' %}
+                        <div style="background-color: #fef3c7; color: #92400e; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center;">
+                            ⏳ Solicitud Enviada (Pendiente de Aprobación)
+                        </div>
+                    {% elif tarea.mi_estado == 'aprobado' %}
+                        <div style="background-color: #d1fae5; color: #065f46; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center;">
+                            ✅ ¡Postulación Aprobada! Formas parte del staff
+                        </div>
+                    {% elif tarea.mi_estado == 'rechazado' %}
+                        <div style="background-color: #fee2e2; color: #991b1b; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center;">
+                            ❌ Solicitud No Aprobada
+                        </div>
+                    {% else %}
+                        {% if (tarea.ocupados or 0) < cupos_max %}
+                            <form action="{{ url_for('postular_tarea', tarea_id=tarea.id) }}" method="POST" style="margin-bottom: 0;">
+                                <input type="hidden" name="evento_id" value="{{ evento.id }}">
+                                <button type="submit" class="outline" style="width: 100%; margin-bottom: 0;">
+                                    <i class="fa-solid fa-hand"></i> Postularme
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="secondary outline" style="width: 100%; margin-bottom: 0;" disabled>
+                                Cupos Llenos
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                </footer>
+            {% endif %}
+
+            <!-- VISTA PARA ADMINISTRADORES / PROFESORES (PANEL DE GESTIÓN DE POSTULANTES) -->
+            {% if rol_limpio in ['admin', 'administrador', 'profesor', 'ponente', 'administrativo'] %}
+                <footer style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color, #e2e8f0);">
+                    <details style="margin: 0;">
+                        <summary role="button" class="secondary outline" style="padding: 6px 12px; font-size: 0.85rem; width: auto; display: inline-block;">
+                            📋 Ver Postulantes ({{ (tarea.postulaciones|length) if tarea.postulaciones else 0 }})
+                        </summary>
+                        {% if tarea.postulaciones %}
+                            <div style="overflow-x: auto; margin-top: 10px;">
+                                <table style="margin: 0; font-size: 0.85rem; width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>Estudiante</th>
+                                            <th>Estado</th>
+                                            <th style="text-align: center;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for post in tarea.postulaciones %}
+                                        <tr>
+                                            <td><strong>{{ post.estudiante_nombre or post.nombre }}</strong></td>
+                                            <td>
+                                                {% if post.estado == 'postulado' %}
+                                                    <span style="color: #d97706; font-weight: bold;">Pendiente</span>
+                                                {% elif post.estado == 'aprobado' %}
+                                                    <span style="color: #16a34a; font-weight: bold;">Aprobado</span>
+                                                {% else %}
+                                                    <span style="color: #dc2626; font-weight: bold;">Rechazado</span>
+                                                {% endif %}
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <div style="display: flex; gap: 5px; justify-content: center;">
+                                                    {% if post.estado != 'aprobado' %}
+                                                    <form action="{{ url_for('gestionar_postulacion', postulacion_id=(post.postulacion_id or post.id), accion='aprobar') }}" method="POST" style="margin: 0;">
+                                                        <input type="hidden" name="evento_id" value="{{ evento.id }}">
+                                                        <button type="submit" style="padding: 4px 10px; font-size: 0.75rem; background-color: #16a34a; border-color: #16a34a; color: white; width: auto;">Aprobar</button>
+                                                    </form>
+                                                    {% endif %}
+                                                    {% if post.estado != 'rechazado' %}
+                                                    <form action="{{ url_for('gestionar_postulacion', postulacion_id=(post.postulacion_id or post.id), accion='rechazar') }}" method="POST" style="margin: 0;">
+                                                        <input type="hidden" name="evento_id" value="{{ evento.id }}">
+                                                        <button type="submit" class="secondary" style="padding: 4px 10px; font-size: 0.75rem; background-color: #dc2626; border-color: #dc2626; color: white; width: auto;">Rechazar</button>
+                                                    </form>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p style="font-size: 0.85rem; margin-top: 10px; color: #64748b; font-style: italic;">Aún no hay postulaciones registradas para esta tarea.</p>
+                        {% endif %}
+                    </details>
+                </footer>
+            {% endif %}
+        </article>
+        {% else %}
+        <p><em>No hay oportunidades de voluntariado registradas para este evento.</em></p>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- REPOSITORIO CIENTÍFICO                                    -->
+<!-- ========================================================= -->
+<article class="card-custom">
+    <header>📚 Repositorio Científico e Información del Evento</header>
+    
+    <p><strong>Resumen (Abstract):</strong></p>
+    <blockquote style="background: #f8fafc; padding: 15px; border-left: 4px solid var(--primary); border-radius: 6px;">
+        {{ evento.abstract or 'El resumen científico de este evento no ha sido publicado todavía.' }}
+    </blockquote>
+
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+        {% if evento.paper_pdf_url %}
+            <a href="{{ evento.paper_pdf_url }}" target="_blank" role="button" class="outline">
+                📄 Descargar Paper Científico (PDF)
+            </a>
+        {% endif %}
+
+        {% if evento.codigo_fuente_url %}
+            <a href="{{ evento.codigo_fuente_url }}" target="_blank" role="button" class="secondary outline">
+                💻 Repositorio de Código (GitHub/GitLab)
+            </a>
+        {% endif %}
+
+        {% if rol_limpio in ['profesor', 'ponente', 'administrador', 'admin', 'administrativo'] %}
+        <a href="{{ url_for('evaluar_evento', evento_id=evento.id) }}" class="button contrast outline">
+            👨‍⚖️ Evaluar Trabajo / Ponencia
+        </a>
+        {% endif %}
+    </div>
+</article>
+
+<!-- ========================================================= -->
+<!-- FORO DE DISCUSIÓN ASÍNCRONA                               -->
+<!-- ========================================================= -->
+<article class="card-custom">
+    <header>💬 Foro de Discusión</header>
+    
+    <form action="{{ url_for('agregar_pregunta_foro', evento_id=evento.id) }}" method="POST">
+        <label for="pregunta">Hacer una pregunta o comentario:</label>
+        <textarea id="pregunta" name="pregunta" rows="3" placeholder="Escribe tu inquietud o consulta aquí..." required></textarea>
+        <button type="submit" style="width: auto; margin-top: 10px;">📤 Publicar Mensaje</button>
+    </form>
+
+    <hr style="margin: 20px 0;">
+
+    <h5>Intervenciones de la Comunidad</h5>
+    {% if preguntas %}
+        {% for preg in preguntas %}
+            <div style="border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #ffffff;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b;">
+                    <strong>👤 {{ preg.usuario_nombre }} ({{ preg.usuario_rol }})</strong>
+                    <span>{{ preg.fecha_publicacion }}</span>
+                </div>
+                <p style="margin: 8px 0 0 0; color: #1e293b;">{{ preg.mensaje }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: #64748b; font-style: italic;">Aún no se han realizado intervenciones en este evento. ¡Sé el primero!</p>
+    {% endif %}
+</article>
+
+<a href="{{ url_for('inicio') }}" class="button secondary outline">⬅️ Volver a la Cartelera</a>
+{% endblock %}

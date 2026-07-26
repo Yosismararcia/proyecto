@@ -14,7 +14,6 @@
 
     <style>
         :root {
-            /* Paleta Institucional UC / FaCyT */
             --primary: #0056b3;
             --primary-gradient: linear-gradient(135deg, #0056b3, #003366);
             --primary-hover: #003f88;
@@ -29,7 +28,6 @@
             --radius: 12px;
         }
 
-        /* RESET Y PREVENCIÓN DE DESBORDAMIENTO MÓVIL */
         *, *::before, *::after {
             box-sizing: border-box !important;
         }
@@ -47,15 +45,11 @@
             line-height: 1.5;
         }
 
-        /* ANULAR FUERZO OSCURO DE PICO.CSS EN TODOS LOS NIVELES */
         [data-theme="dark"], article, section, div, main, .card, header, footer {
             background-color: transparent;
             color: inherit;
         }
 
-        /* =========================================================
-           ENCABEZADO, BRANDING Y LOGOS
-           ========================================================= */
         .top-navbar {
             background: #ffffff !important;
             border-bottom: 2px solid #e2e8f0 !important;
@@ -89,12 +83,6 @@
             gap: 8px;
         }
 
-        .logo-img {
-            height: 42px;
-            width: auto;
-            object-fit: contain;
-        }
-
         .logo-placeholder {
             width: 40px;
             height: 40px;
@@ -124,7 +112,6 @@
             display: block;
         }
 
-        /* NAVEGACIÓN DENSIDAD Y BOTONES */
         .nav-menu {
             display: flex;
             align-items: center;
@@ -173,9 +160,6 @@
             color: #ffffff !important;
         }
 
-        /* =========================================================
-           MAQUETACIÓN Y DISTRIBUCIÓN
-           ========================================================= */
         .app-layout {
             display: grid !important;
             grid-template-columns: 280px 1fr !important;
@@ -198,9 +182,6 @@
             min-width: 0;
         }
 
-        /* =========================================================
-           TARJETAS Y CONTENEDORES
-           ========================================================= */
         article, .card, .card-custom, main article {
             background-color: var(--bg-card) !important;
             color: var(--text-main) !important;
@@ -237,7 +218,6 @@
             color: var(--text-main);
         }
 
-        /* RELOJ Y CALENDARIO */
         .clock-box {
             font-size: 1.8rem !important;
             font-weight: 800 !important;
@@ -265,7 +245,6 @@
             background-color: #f8fafc;
         }
 
-        /* BADGES */
         .badge {
             display: inline-block;
             padding: 4px 10px;
@@ -281,9 +260,6 @@
             border: 1px solid #bae6fd;
         }
 
-        /* =========================================================
-           TABLAS, FORMULARIOS E INPUTS
-           ========================================================= */
         label {
             font-weight: 600 !important;
             font-size: 0.9rem !important;
@@ -325,7 +301,6 @@
             transform: translateY(-1px);
         }
 
-        /* TABLAS RESPONSIVAS */
         .table-container {
             width: 100%;
             overflow-x: auto;
@@ -355,7 +330,6 @@
             color: var(--text-main) !important;
         }
 
-        /* FLASH MESSAGES */
         .msg-flash {
             padding: 12px 16px;
             border-radius: 8px;
@@ -369,9 +343,6 @@
         .msg-error, .msg-danger { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
         .msg-success { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
 
-        /* =========================================================
-           ADAPTABILIDAD MÓVIL (RESPONSIVE DESIGN)
-           ========================================================= */
         @media (max-width: 992px) {
             .app-layout {
                 grid-template-columns: 1fr !important;
@@ -399,18 +370,10 @@
 </head>
 <body>
 
-    <!-- ENCABEZADO Y NAVEGACIÓN -->
     <header class="top-navbar">
         <div class="nav-wrapper">
-           
-            <!-- LOGOS Y TITULO DEL SISTEMA -->
             <a href="/" class="brand-container">
                 <div class="brand-logos">
-                    <!-- Si tienes las imágenes colócalas en static/img/ y descomenta las siguientes líneas -->
-                    <!-- <img src="{{ url_for('static', filename='img/logo_uc.png') }}" alt="UC" class="logo-img"> -->
-                    <!-- <img src="{{ url_for('static', filename='img/logo_facyt.png') }}" alt="FaCyT" class="logo-img"> -->
-                   
-                    <!-- Marcadores mientras agregas tus imágenes -->
                     <div class="logo-placeholder"><i class="fa-solid fa-atom"></i></div>
                 </div>
                 <div class="brand-text">
@@ -419,7 +382,6 @@
                 </div>
             </a>
 
-            <!-- MENÚ PRINCIPAL -->
             <ul class="nav-menu">
                 {% if session.get('usuario_id') %}
                     <li><a href="{{ url_for('inicio') }}" class="nav-link-custom"><i class="fa-solid fa-chart-pie"></i> Inicio</a></li>
@@ -447,10 +409,7 @@
         </div>
     </header>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="container-fluid" style="padding: 0; max-width: 100%;">
-
-        <!-- ALERTAS FLASH -->
         <div style="max-width: 1400px; margin: 15px auto 0 auto; padding: 0 16px;">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -465,10 +424,7 @@
         <div class="{% if session.get('usuario_id') %}app-layout{% else %}container{% endif %}" style="{% if not session.get('usuario_id') %}max-width: 500px; margin: 40px auto; padding: 0 16px;{% endif %}">
 
             {% if session.get('usuario_id') %}
-            <!-- BARRA LATERAL (SIDEBAR) -->
             <aside class="sidebar">
-
-                <!-- Perfil Activo -->
                 <div class="card-custom">
                     <header><i class="fa-solid fa-id-card"></i> Perfil Activo</header>
                     <p style="margin-bottom: 2px; font-size: 0.85rem; color: var(--text-muted);">Usuario conectado:</p>
@@ -477,39 +433,31 @@
                     <span class="badge badge-completado">{{ session.get('usuario_rol', 'Invitado') }}</span>
                 </div>
 
-                <!-- Reloj del Sistema -->
                 <div class="card-custom">
                     <header style="justify-content: center;"><i class="fa-solid fa-clock"></i> Hora del Sistema</header>
                     <div id="live-clock" class="clock-box">00:00:00</div>
                     <div id="live-date" class="date-box">--/--/----</div>
                 </div>
 
-                <!-- Consultar Eventos / Calendario -->
                 <div class="card-custom">
                     <header><i class="fa-solid fa-calendar-check"></i> Eventos por Fecha</header>
                     <input type="date" id="sidebar-calendar" style="margin-bottom: 0;">
                     <span id="sidebar-calendar-msg" class="calendar-status"></span>
                 </div>
-
             </aside>
             {% endif %}
 
-            <!-- VISTA / CONTENIDO DE LA PÁGINA -->
             <section class="main-content">
                 {% block content %}{% endblock %}
             </section>
-
         </div>
-
     </main>
 
-    <!-- PIE DE PÁGINA -->
     <footer style="margin-top: 50px; padding: 20px; text-align: center; color: var(--text-muted); border-top: 1px solid var(--border-color); background: #ffffff;">
         <small>© 2026 Facultad Experimental de Ciencias y Tecnología (FaCyT - UC)<br>
         <strong>SGJC</strong> — Sistema para la Gestión de Jornadas Científicas y Eventos Académicos</small>
     </footer>
 
-    <!-- SCRIPT DEL RELOJ Y VERIFICACIÓN -->
     <script>
         function updateClock() {
             const now = new Date();

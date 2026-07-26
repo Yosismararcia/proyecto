@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Evaluación de Jurado - {{ evento.titulo }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+    <div>
+        <h2 style="margin: 0;">👨‍⚖️ Módulo de Evaluación / Jurado</h2>
+        <p style="margin: 0; color: var(--text-muted);">Evento: <strong>{{ evento.titulo }}</strong></p>
+    </div>
+    <a href="{{ url_for('detalle_evento', evento_id=evento.id) }}" class="button secondary outline" style="margin: 0;">
+        ⬅️ Volver al Evento
+    </a>
+</div>
+
+<article class="card-custom">
+    <header>
+        <i class="fa-solid fa-clipboard-check"></i> Rúbrica de Calificación (1 a 5 Puntos)
+    </header>
+
+    <form action="{{ url_for('evaluar_evento', evento_id=evento.id) }}" method="POST">
+        <div class="grid">
+            <!-- Criterio 1 -->
+            <div>
+                <label for="puntuacion_contenido">
+                    <strong>1. Calidad del Contenido / Trabajo</strong>
+                </label>
+                <select name="puntuacion_contenido" id="puntuacion_contenido" required>
+                    <option value="5" {% if evaluacion and evaluacion.puntuacion_contenido == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ 5 - Excelente</option>
+                    <option value="4" {% if evaluacion and evaluacion.puntuacion_contenido == 4 %}selected{% endif %}>⭐⭐⭐⭐ 4 - Bueno</option>
+                    <option value="3" {% if evaluacion and evaluacion.puntuacion_contenido == 3 %}selected{% endif %}>⭐⭐⭐ 3 - Aceptable</option>
+                    <option value="2" {% if evaluacion and evaluacion.puntuacion_contenido == 2 %}selected{% endif %}>⭐⭐ 2 - Regular</option>
+                    <option value="1" {% if evaluacion and evaluacion.puntuacion_contenido == 1 %}selected{% endif %}>⭐ 1 - Deficiente</option>
+                </select>
+            </div>
+
+            <!-- Criterio 2 -->
+            <div>
+                <label for="puntuacion_dominio">
+                    <strong>2. Dominio del Tema y Defensa</strong>
+                </label>
+                <select name="puntuacion_dominio" id="puntuacion_dominio" required>
+                    <option value="5" {% if evaluacion and evaluacion.puntuacion_dominio == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ 5 - Excelente</option>
+                    <option value="4" {% if evaluacion and evaluacion.puntuacion_dominio == 4 %}selected{% endif %}>⭐⭐⭐⭐ 4 - Bueno</option>
+                    <option value="3" {% if evaluacion and evaluacion.puntuacion_dominio == 3 %}selected{% endif %}>⭐⭐⭐ 3 - Aceptable</option>
+                    <option value="2" {% if evaluacion and evaluacion.puntuacion_dominio == 2 %}selected{% endif %}>⭐⭐ 2 - Regular</option>
+                    <option value="1" {% if evaluacion and evaluacion.puntuacion_dominio == 1 %}selected{% endif %}>⭐ 1 - Deficiente</option>
+                </select>
+            </div>
+
+            <!-- Criterio 3 -->
+            <div>
+                <label for="puntuacion_presentacion">
+                    <strong>3. Recursos y Presentación Visual</strong>
+                </label>
+                <select name="puntuacion_presentacion" id="puntuacion_presentacion" required>
+                    <option value="5" {% if evaluacion and evaluacion.puntuacion_presentacion == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ 5 - Excelente</option>
+                    <option value="4" {% if evaluacion and evaluacion.puntuacion_presentacion == 4 %}selected{% endif %}>⭐⭐⭐⭐ 4 - Bueno</option>
+                    <option value="3" {% if evaluacion and evaluacion.puntuacion_presentacion == 3 %}selected{% endif %}>⭐⭐⭐ 3 - Aceptable</option>
+                    <option value="2" {% if evaluacion and evaluacion.puntuacion_presentacion == 2 %}selected{% endif %}>⭐⭐ 2 - Regular</option>
+                    <option value="1" {% if evaluacion and evaluacion.puntuacion_presentacion == 1 %}selected{% endif %}>⭐ 1 - Deficiente</option>
+                </select>
+            </div>
+        </div>
+
+        <br>
+
+        <label for="observaciones">
+            <strong>📝 Observaciones y Retroalimentación del Jurado:</strong>
+        </label>
+        <textarea name="observaciones" id="observaciones" rows="4" placeholder="Escriba aquí los comentarios, sugerencias o aspectos a mejorar para los ponentes...">{{ evaluacion.observaciones if evaluacion else '' }}</textarea>
+
+        <footer style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="primary">
+                💾 {% if evaluacion %}Actualizar Evaluación{% else %}Guardar Evaluación{% endif %}
+            </button>
+        </footer>
+    </form>
+</article>
+{% endblock %}

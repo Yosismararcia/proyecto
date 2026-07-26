@@ -6,10 +6,9 @@
 <h2>🏢 Gestión de Espacios Físicos</h2>
 <p>Administra los salones, laboratorios y auditorios disponibles en la facultad.</p>
 
-<!-- Acordeón para agregar nuevo espacio -->
 <details style="margin-bottom: 30px;">
     <summary role="button" class="secondary">➕ Registrar Nuevo Espacio</summary>
-    <article style="margin-top: 10px; background-color: #f8f9fa; border: 1px solid #e5e7eb;">
+    <article style="margin-top: 10px; background-color: #f8f9fa; border: 1px solid var(--border-color);">
         <form action="/admin/espacios/nuevo" method="POST" style="margin-bottom: 0;">
             <div class="grid">
                 <label>
@@ -30,11 +29,10 @@
     </article>
 </details>
 
-<hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 30px;">
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 30px;">
 
-<!-- Tabla de espacios existentes -->
 <h3>Lista de Espacios Registrados</h3>
-<figure>
+<div class="table-container">
     <table>
         <thead>
             <tr>
@@ -72,5 +70,5 @@
             {% endif %}
         </tbody>
     </table>
-</figure>
+</div>
 {% endblock %}

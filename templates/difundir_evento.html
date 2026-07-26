@@ -85,7 +85,7 @@ Tipo: {{ evento.tipo_actividad or 'Evento Académico' }}
 
 📅 Fecha: {{ evento.fecha_formateada }}
 ⏰ Hora: {{ evento.inicio_formateado }} - {{ evento.fin_formateado }}
-📍 Lugar: {{ evento.espacio_nombre or 'Por definir' }}
+📍 Lugar: {{ evento.espacio or 'Por definir' }}
 {% if evento.enlace_virtual %}🔗 Enlace Virtual: {{ evento.enlace_virtual }}{% endif %}
 
 Descripción: {{ evento.descripcion or 'Sin descripción' }}

@@ -3,23 +3,28 @@
 {% block title %}Recuperar Acceso - FaCyT{% endblock %}
 
 {% block content %}
-<article style="max-width: 500px; margin: 0 auto;">
-    <header>
-        <h3 style="text-align: center;">Recuperar Acceso al Sistema 🔑</h3>
+<article style="max-width: 480px; margin: 20px auto; padding: 30px;">
+    <header style="text-align: center; margin-bottom: 20px;">
+        <h3 style="margin-bottom: 5px;">Recuperar Acceso 🔑</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Ingresa tus datos institucionales para validar la identidad</p>
     </header>
     
     <form action="/recuperar-acceso" method="POST">
-        <label for="cedula">Cédula de Identidad:</label>
-        <input type="text" id="cedula" name="cedula" placeholder="V-12345678" required>
+        <div style="margin-bottom: 15px;">
+            <label for="cedula">Cédula de Identidad:</label>
+            <input type="text" id="cedula" name="cedula" placeholder="V-12345678" required>
+        </div>
 
-        <label for="correo">Correo Electrónico Institucional:</label>
-        <input type="email" id="correo" name="correo" placeholder="usuario@uc.edu.ve" required>
+        <div style="margin-bottom: 20px;">
+            <label for="correo">Correo Electrónico Institucional:</label>
+            <input type="email" id="correo" name="correo" placeholder="usuario@uc.edu.ve" required>
+        </div>
 
-        <input type="submit" value="Verificar Datos" class="primary">
+        <input type="submit" value="Verificar Datos" class="primary" style="width: 100%;">
     </form>
     
-    <footer style="text-align: center; margin-top: 1rem;">
-        <p><a href="/login">Volver al inicio de sesión</a></p>
+    <footer style="text-align: center; margin-top: 20px; background: transparent; border-top: none; padding: 0;">
+        <p style="margin: 0;"><a href="/login" style="color: var(--primary); font-weight: 600;">Volver al inicio de sesión</a></p>
     </footer>
 </article>
 {% endblock %}

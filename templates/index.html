@@ -5,9 +5,6 @@
 {% block content %}
 
 {% if anonimo %}
-    <!-- ========================================== -->
-    <!-- VISTA PARA USUARIOS NO AUTENTICADOS        -->
-    <!-- ========================================== -->
     <article style="text-align: center; padding: 40px 20px;">
         <h2>🏛️ Sistema de Gestión de Jornadas Científicas (SGJC)</h2>
         <p style="font-size: 1.1rem; color: #555; max-width: 700px; margin: 0 auto 30px auto;">
@@ -21,12 +18,8 @@
     </article>
 
 {% else %}
-    <!-- ========================================== -->
-    <!-- VISTA PARA USUARIOS AUTENTICADOS           -->
-    <!-- ========================================== -->
     <h2>📊 Estadísticas del Sistema</h2>
 
-    <!-- TARJETAS DE ESTADÍSTICAS / MÉTRICAS -->
     <div class="grid" style="margin-bottom: 30px;">
         <article style="text-align: center; padding: 15px;">
             <small>📅 Eventos Totales</small>
@@ -49,11 +42,9 @@
         </article>
     </div>
 
-    <!-- CARTELERA Y PRÓXIMOS EVENTOS -->
     <section>
         <h3>📌 Próximas Actividades Aprobadas</h3>
         {% if eventos_cartelera %}
-            <!-- MODIFICACIÓN AQUÍ: GRID AUTO-AJUSTABLE PARA EVITAR COMPRESIÓN -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
                 {% for ev in eventos_cartelera %}
                     <article style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
@@ -67,12 +58,9 @@
                                 <strong>{{ ev.titulo }}</strong>
                             </header>
                             
-                            <!-- 📍 Corrección del Espacio: Fallback para evitar texto en blanco -->
                             <p><small>📍 <strong>Espacio:</strong> {{ ev.espacio or ev.espacio_nombre or 'Por asignar' }}</small></p>
-                            
                             <p><small>🗓 <strong>Fecha:</strong> {{ ev.fecha }} | 🕒 {{ ev.hora_inicio }} - {{ ev.hora_fin }}</small></p>
                             
-                            <!-- 👥 CONTROL VISUAL DE AFORO -->
                             {% if ev.capacidad is defined or ev.capacidad_maxima is defined %}
                                 {% set cap_max = ev.capacidad if ev.capacidad is defined else ev.capacidad_maxima %}
                                 {% set total_insc = ev.total_inscritos if ev.total_inscritos is defined else 0 %}
@@ -81,7 +69,6 @@
                                 </p>
                             {% endif %}
 
-                            <!-- 🔗 ENLACE VIRTUAL: Solo visible si el usuario YA ESTÁ INSCRITO -->
                             {% if eventos_inscritos_ids is defined and ev.id in eventos_inscritos_ids and ev.enlace_virtual %}
                                 <div style="margin-top: 10px; padding: 10px; background-color: #1e293b; border-radius: 6px; border-left: 4px solid #00acc1;">
                                     <small style="color: #80deea; font-weight: bold; display: block; margin-bottom: 2px;">
@@ -94,9 +81,15 @@
                             {% endif %}
                         </div>
                         
-                        <footer style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
-                            <!-- Botón para Ver Lista de Inscritos (Roles Especiales) -->
-                            {% if session.get('rol') in ['profesor', 'ponente', 'admin', 'administrativo'] %}
+                        <footer style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; background: transparent; border-top: none; padding: 0;">
+                            <!-- nueva modif AQUÍ VA LA MODIFICACIÓN: BOTÓN DE VER DETALLE -->
+                            <a href="{{ url_for('detalle_evento', evento_id=ev.id) }}" 
+                            class="button outline" 
+                            style="width: 100%; text-align: center; margin: 0;">
+                                🔍 Ver Detalle, Repositorio y Foro
+                            </a>
+
+                            {% if session.get('usuario_rol') in ['profesor', 'ponente', 'admin', 'administrative', 'administrativo'] %}
                                 <a href="{{ url_for('ver_inscritos_evento', evento_id=ev.id) }}" 
                                    class="button outline" 
                                    style="width: 100%; text-align: center; margin: 0;">
@@ -104,24 +97,20 @@
                                 </a>
                             {% endif %}
                             
-                            <!-- Formulario y Lógica de Inscripción con Validación de Aforo -->
                             {% set cap_max = ev.capacidad if ev.capacidad is defined else (ev.capacidad_maxima if ev.capacidad_maxima is defined else 9999) %}
                             {% set total_insc = ev.total_inscritos if ev.total_inscritos is defined else 0 %}
                             
                             {% if eventos_inscritos_ids is defined and ev.id in eventos_inscritos_ids %}
-                                <!-- Caso 1: El usuario ya está inscrito -->
                                 <button type="button" class="secondary" disabled style="width: 100%; text-align: center; margin: 0;">
                                     ✓ Ya estás inscrito
                                 </button>
                             
                             {% elif total_insc >= cap_max %}
-                                <!-- Caso 2: Capacidad agotada (Aforo lleno) -->
                                 <button type="button" class="contrast" disabled style="width: 100%; text-align: center; margin: 0; opacity: 0.6;">
                                     🚫 Capacidad Agotada
                                 </button>
 
                             {% else %}
-                                <!-- Caso 3: Disponible para inscripción -->
                                 <form action="{{ url_for('inscribir_evento', evento_id=ev.id) }}" method="POST" style="margin: 0;">
                                     <button type="submit" style="width: 100%; text-align: center; margin: 0;">
                                         ✍️ Inscribirme al Evento
@@ -129,8 +118,7 @@
                                 </form>
                             {% endif %}
                             
-                            <!-- Botón de Difusión -->
-                            {% if session.get('rol') in ['profesor', 'ponente', 'admin', 'administrativo'] %}
+                            {% if session.get('usuario_rol') in ['profesor', 'ponente', 'admin', 'administrative', 'administrativo'] %}
                                 <a href="{{ url_for('difundir_evento', evento_id=ev.id) }}" 
                                    class="button contrast outline" 
                                    style="width: 100%; text-align: center; margin-top: 4px;">

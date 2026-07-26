@@ -3,20 +3,22 @@
 {% block title %}Solicitar Evento - FaCyT{% endblock %}
 
 {% block content %}
-<article>
-    <header>
-        <h2>Solicitud de Nuevo Evento Científico 📝</h2>
-        <p>Complete los datos para proponer una jornada, congreso o actividad académica en la FaCyT.</p>
+<article style="max-width: 800px; margin: 0 auto;">
+    <header style="margin-bottom: 20px;">
+        <h2 style="margin-bottom: 5px;">Solicitud de Evento Académico 📝</h2>
+        <p style="color: var(--text-muted);">Complete los campos requeridos para reservar un espacio físico o generar una transmisión virtual en la facultad.</p>
     </header>
 
     <form action="/solicitar" method="POST">
         
         <!-- 1. Título de la Actividad -->
-        <label for="titulo">Título de la Actividad:</label>
-        <input type="text" id="titulo" name="titulo" placeholder="Ej. Muestra de Proyectos de Software / Simposio de Biotecnología" required>
+        <div style="margin-bottom: 15px;">
+            <label for="titulo">Título de la Actividad:</label>
+            <input type="text" id="titulo" name="titulo" placeholder="Ej. Muestra de Proyectos de Software / Simposio de Biotecnología" required>
+        </div>
 
-        <!-- 2. Departamento y Tipo de Actividad Adaptados a la FaCyT -->
-        <div class="grid">
+        <!-- 2. Departamento y Tipo de Actividad -->
+        <div class="grid" style="margin-bottom: 15px;">
             <div>
                 <label for="departamento">Departamento / Organización:</label>
                 <select id="departamento" name="departamento" required>
@@ -46,23 +48,25 @@
         </div>
 
         <!-- 3. Selección de Espacio Físico o Virtual -->
-        <label for="espacio_id">Espacio Físico o Modalidad Solicitada:</label>
-        <select id="espacio_id" name="espacio_id" onchange="consultarDisponibilidad()" required>
-            <option value="" disabled selected>Seleccione el lugar...</option>
-            {% for espacio in espacios %}
-                <option value="{{ espacio.id }}">{{ espacio.nombre }} (Capacidad: {{ espacio.capacidad }})</option>
-            {% endfor %}
-        </select>
+        <div style="margin-bottom: 15px;">
+            <label for="espacio_id">Espacio Físico o Modalidad Solicitada:</label>
+            <select id="espacio_id" name="espacio_id" onchange="consultarDisponibilidad()" required>
+                <option value="" disabled selected>Seleccione el lugar...</option>
+                {% for espacio in espacios %}
+                    <option value="{{ espacio.id }}">{{ espacio.nombre }} (Capacidad: {{ espacio.capacidad }})</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <!-- Campo Dinámico: Enlace Virtual (Se activa si eligen opción virtual) -->
-        <div id="div_enlace_virtual" style="display: none; margin-bottom: 1rem;">
+        <!-- Campo Dinámico: Enlace Virtual -->
+        <div id="div_enlace_virtual" style="display: none; margin-bottom: 15px;">
             <label for="enlace_virtual">🔗 Enlace de la Reunión (Google Meet / Zoom):</label>
             <input type="url" id="enlace_virtual" name="enlace_virtual" placeholder="https://meet.google.com/abc-defg-hij">
-            <small>Enlace público para la transmisión en vivo o reunión virtual.</small>
+            <small style="color: var(--text-muted);">Enlace público para la transmisión en vivo o reunión virtual.</small>
         </div>
 
         <!-- 4. Fecha y Horarios -->
-        <div class="grid">
+        <div class="grid" style="margin-bottom: 20px;">
             <div>
                 <label for="fecha">Fecha del Evento:</label>
                 <input type="date" id="fecha" name="fecha" onchange="consultarDisponibilidad()" required>
@@ -71,26 +75,24 @@
                 <label for="hora_inicio">Hora de Inicio:</label>
                 <input type="time" id="hora_inicio" name="hora_inicio" required>
             </div>
-            
             <div>
                 <label for="hora_fin">Hora de Finalización:</label>
                 <input type="time" id="hora_fin" name="hora_fin" required>
             </div>
         </div>
 
-        <!-- 5. Línea de Tiempo / Disponibilidad Visual en Tiempo Real -->
-        <div id="disponibilidad-container" style="display: none; margin-bottom: 1.5rem; background: #fdfdfe; border: 1px solid #e3e6f0; border-radius: 8px; padding: 1rem;">
-            <label style="font-weight: bold; margin-bottom: 0.5rem; display: block;">🕒 Estado de Ocupación para esta Fecha:</label>
+        <!-- 5. Disponibilidad en tiempo real -->
+        <div id="disponibilidad-container" style="display: none; margin-bottom: 20px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
+            <label style="font-weight: bold; margin-bottom: 8px; display: block; color: #0f172a;">🕒 Estado de Ocupación para esta Fecha:</label>
             <div id="timeline-slots">
-                <small style="color: #6c757d;">Cargando disponibilidad...</small>
+                <small style="color: var(--text-muted);">Cargando disponibilidad...</small>
             </div>
         </div>
 
-        <input type="submit" value="Enviar Solicitud de Evento" class="primary">
+        <button type="submit" class="primary" style="width: 100%;">Enviar Solicitud de Evento</button>
     </form>
 </article>
 
-<!-- Script para manejar la modalidad virtual y la consulta de disponibilidad en la línea de tiempo -->
 <script>
 function toggleEnlaceVirtual() {
     var selectEspacio = document.getElementById('espacio_id');
@@ -115,24 +117,23 @@ function consultarDisponibilidad() {
     var contenedor = document.getElementById('disponibilidad-container');
     var slotsDiv = document.getElementById('timeline-slots');
 
-    // Si falta alguno de los dos campos, ocultamos el bloque
     if (!espacioId || !fecha) {
         contenedor.style.display = 'none';
         return;
     }
 
     contenedor.style.display = 'block';
-    slotsDiv.innerHTML = '<small style="color: #6c757d;">Consultando disponibilidad en la base de datos...</small>';
+    slotsDiv.innerHTML = '<small style="color: var(--text-muted);">Consultando disponibilidad en la base de datos...</small>';
 
     fetch(`/api/disponibilidad-espacio?espacio_id=${espacioId}&fecha=${fecha}`)
         .then(response => response.json())
         .then(data => {
             if (data.length === 0) {
-                slotsDiv.innerHTML = '<span style="color: #28a745; font-size: 0.9rem;">✅ ¡Excelente! El espacio está completamente libre en esta fecha.</span>';
+                slotsDiv.innerHTML = '<span style="color: #166534; font-size: 0.9rem; font-weight: 600;">✅ El espacio seleccionado está disponible en esta fecha.</span>';
             } else {
-                let html = '<ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #dc3545;">';
+                let html = '<ul style="margin: 0; padding-left: 20px; font-size: 0.88rem; color: #991b1b;">';
                 data.forEach(ev => {
-                    html += `<li style="margin-bottom: 4px;"><strong>${ev.inicio} - ${ev.fin}</strong>: ${ev.titulo} <span style="background: #ffeeba; color: #856404; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem;">${ev.estado}</span></li>`;
+                    html += `<li style="margin-bottom: 4px;"><strong>${ev.inicio} - ${ev.fin}</strong>: ${ev.titulo} <span style="background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">${ev.estado}</span></li>`;
                 });
                 html += '</ul>';
                 slotsDiv.innerHTML = html;
@@ -140,7 +141,7 @@ function consultarDisponibilidad() {
         })
         .catch(err => {
             console.error("Error al consultar disponibilidad:", err);
-            slotsDiv.innerHTML = '<span style="color: #dc3545; font-size: 0.9rem;">❌ No se pudo cargar la disponibilidad en este momento.</span>';
+            slotsDiv.innerHTML = '<span style="color: #dc2626; font-size: 0.9rem;">❌ Ocurrió un inconveniente al consultar la disponibilidad.</span>';
         });
 }
 </script>

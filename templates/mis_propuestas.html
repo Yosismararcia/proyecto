@@ -7,7 +7,7 @@
 <p>Historial de iniciativas de congresos o talleres que has sugerido al cuerpo docente de la facultad.</p>
 
 <article>
-    <div class="table-responsive"></div>
+    <div class="table-container">
         <table>
             <thead>
                 <tr>
@@ -24,7 +24,7 @@
                         <td><strong>{{ prop.titulo }}</strong></td>
                         <td><span class="badge" style="background:#2f855a; color:white; padding:2px 6px; border-radius:4px;">{{ prop.tipo_actividad }}</span></td>
                         <td>{{ prop.descripcion }}</td>
-                        <td>{{ prop.fecha_propuesta }}</td>
+                        <td>{{ prop.fecha_propuesta_evento }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -34,9 +34,9 @@
                 {% endif %}
             </tbody>
         </table>
-        <footer>
-            <a href="/" class="button secondary">Volver al Inicio</a>
-        </footer>
     </div>
+    <footer style="background: transparent; border-top: none; padding-top: 15px;">
+        <a href="/" class="button secondary">Volver al Inicio</a>
+    </footer>
 </article>
 {% endblock %}
