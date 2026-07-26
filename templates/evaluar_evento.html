@@ -3,29 +3,38 @@
 {% block title %}Evaluación de Jurado - {{ evento.titulo }}{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+<!-- ENCABEZADO Y NAVEGACIÓN -->
+<div style="margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
     <div>
-        <h2 style="margin: 0;">👨‍⚖️ Módulo de Evaluación / Jurado</h2>
-        <p style="margin: 0; color: var(--text-muted);">Evento: <strong>{{ evento.titulo }}</strong></p>
+        <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-gavel" style="color: #1d4ed8;"></i> Módulo de Evaluación
+        </h2>
+        <p style="font-size: 1.2rem; color: #475569; font-weight: 600; margin: 0;">
+            Evento: <strong style="color: #0f172a;">{{ evento.titulo }}</strong>
+        </p>
     </div>
-    <a href="{{ url_for('detalle_evento', evento_id=evento.id) }}" class="button secondary outline" style="margin: 0;">
-        ⬅️ Volver al Evento
+    <a href="{{ url_for('detalle_evento', evento_id=evento.id) }}" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 800;">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Evento
     </a>
 </div>
 
-<article class="card-custom">
-    <header>
-        <i class="fa-solid fa-clipboard-check"></i> Rúbrica de Calificación (1 a 5 Puntos)
-    </header>
+<!-- TARJETA PRINCIPAL DE EVALUACIÓN -->
+<div style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+    <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-clipboard-check" style="color: #1d4ed8;"></i> Rúbrica de Calificación (1 a 5 Puntos)
+        </h3>
+    </div>
 
-    <form action="{{ url_for('evaluar_evento', evento_id=evento.id) }}" method="POST">
-        <div class="grid">
+    <form action="{{ url_for('evaluar_evento', evento_id=evento.id) }}" method="POST" style="margin: 0;">
+        <!-- CUADRÍCULA DE CRITERIOS DE EVALUACIÓN -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 24px;">
             <!-- Criterio 1 -->
             <div>
-                <label for="puntuacion_contenido">
-                    <strong>1. Calidad del Contenido / Trabajo</strong>
+                <label for="puntuacion_contenido" style="display: block; font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">
+                    1. Calidad del Contenido / Trabajo
                 </label>
-                <select name="puntuacion_contenido" id="puntuacion_contenido" required>
+                <select name="puntuacion_contenido" id="puntuacion_contenido" required style="width: 100%; padding: 10px 12px; border: 2px solid #64748b; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #0f172a; background-color: #ffffff; box-sizing: border-box; cursor: pointer;">
                     <option value="5" {% if evaluacion and evaluacion.puntuacion_contenido == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ 5 - Excelente</option>
                     <option value="4" {% if evaluacion and evaluacion.puntuacion_contenido == 4 %}selected{% endif %}>⭐⭐⭐⭐ 4 - Bueno</option>
                     <option value="3" {% if evaluacion and evaluacion.puntuacion_contenido == 3 %}selected{% endif %}>⭐⭐⭐ 3 - Aceptable</option>
@@ -36,10 +45,10 @@
 
             <!-- Criterio 2 -->
             <div>
-                <label for="puntuacion_dominio">
-                    <strong>2. Dominio del Tema y Defensa</strong>
+                <label for="puntuacion_dominio" style="display: block; font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">
+                    2. Dominio del Tema y Defensa
                 </label>
-                <select name="puntuacion_dominio" id="puntuacion_dominio" required>
+                <select name="puntuacion_dominio" id="puntuacion_dominio" required style="width: 100%; padding: 10px 12px; border: 2px solid #64748b; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #0f172a; background-color: #ffffff; box-sizing: border-box; cursor: pointer;">
                     <option value="5" {% if evaluacion and evaluacion.puntuacion_dominio == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ 5 - Excelente</option>
                     <option value="4" {% if evaluacion and evaluacion.puntuacion_dominio == 4 %}selected{% endif %}>⭐⭐⭐⭐ 4 - Bueno</option>
                     <option value="3" {% if evaluacion and evaluacion.puntuacion_dominio == 3 %}selected{% endif %}>⭐⭐⭐ 3 - Aceptable</option>
@@ -50,10 +59,10 @@
 
             <!-- Criterio 3 -->
             <div>
-                <label for="puntuacion_presentacion">
-                    <strong>3. Recursos y Presentación Visual</strong>
+                <label for="puntuacion_presentacion" style="display: block; font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">
+                    3. Recursos y Presentación Visual
                 </label>
-                <select name="puntuacion_presentacion" id="puntuacion_presentacion" required>
+                <select name="puntuacion_presentacion" id="puntuacion_presentacion" required style="width: 100%; padding: 10px 12px; border: 2px solid #64748b; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #0f172a; background-color: #ffffff; box-sizing: border-box; cursor: pointer;">
                     <option value="5" {% if evaluacion and evaluacion.puntuacion_presentacion == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ 5 - Excelente</option>
                     <option value="4" {% if evaluacion and evaluacion.puntuacion_presentacion == 4 %}selected{% endif %}>⭐⭐⭐⭐ 4 - Bueno</option>
                     <option value="3" {% if evaluacion and evaluacion.puntuacion_presentacion == 3 %}selected{% endif %}>⭐⭐⭐ 3 - Aceptable</option>
@@ -63,18 +72,20 @@
             </div>
         </div>
 
-        <br>
+        <!-- OBSERVACIONES Y RETROALIMENTACIÓN -->
+        <div style="margin-bottom: 24px;">
+            <label for="observaciones" style="display: block; font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">
+                Observaciones del Jurado:
+            </label>
+            <textarea name="observaciones" id="observaciones" rows="4" placeholder="Escriba aquí los comentarios, sugerencias o aspectos a mejorar para los ponentes..." style="width: 100%; padding: 12px; border: 2px solid #64748b; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #0f172a; background-color: #ffffff; box-sizing: border-box; resize: vertical;">{{ evaluacion.observaciones if evaluacion else '' }}</textarea>
+        </div>
 
-        <label for="observaciones">
-            <strong>📝 Observaciones y Retroalimentación del Jurado:</strong>
-        </label>
-        <textarea name="observaciones" id="observaciones" rows="4" placeholder="Escriba aquí los comentarios, sugerencias o aspectos a mejorar para los ponentes...">{{ evaluacion.observaciones if evaluacion else '' }}</textarea>
-
-        <footer style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-            <button type="submit" class="primary">
-                💾 {% if evaluacion %}Actualizar Evaluación{% else %}Guardar Evaluación{% endif %}
+        <!-- ACCIONES -->
+        <div style="display: flex; justify-content: flex-end; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+            <button type="submit" class="btn btn-primary" style="padding: 12px 24px; font-size: 0.9rem;">
+                <i class="fa-solid fa-floppy-disk"></i> {% if evaluacion %}Actualizar Evaluación{% else %}Guardar Evaluación{% endif %}
             </button>
-        </footer>
+        </div>
     </form>
-</article>
+</div>
 {% endblock %}

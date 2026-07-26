@@ -3,28 +3,46 @@
 {% block title %}Recuperar Acceso - FaCyT{% endblock %}
 
 {% block content %}
-<article style="max-width: 480px; margin: 20px auto; padding: 30px;">
-    <header style="text-align: center; margin-bottom: 20px;">
-        <h3 style="margin-bottom: 5px;">Recuperar Acceso 🔑</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Ingresa tus datos institucionales para validar la identidad</p>
-    </header>
-    
-    <form action="/recuperar-acceso" method="POST">
-        <div style="margin-bottom: 15px;">
-            <label for="cedula">Cédula de Identidad:</label>
-            <input type="text" id="cedula" name="cedula" placeholder="V-12345678" required>
-        </div>
+<main style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 20px;">
+    <article style="max-width: 440px; width: 100%; padding: 32px; border-radius: 12px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);">
+        
+        <!-- Encabezado -->
+        <header style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">🔑</div>
+            <h3 style="margin-bottom: 8px; font-weight: 800; color: #0f172a; font-size: 1.35rem;">Recuperar Acceso</h3>
+            <p style="color: #64748b; font-size: 0.9rem; margin: 0; font-weight: 500; line-height: 1.4;">
+                Ingresa tus datos institucionales para validar tu identidad
+            </p>
+        </header>
+        
+        <!-- Formulario -->
+            <form action="{{ url_for('recuperar_acceso') }}" method="POST">            <div style="margin-bottom: 16px;">
+                <label for="cedula" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">
+                    Cédula de Identidad:
+                </label>
+                <input type="text" id="cedula" name="cedula" placeholder="V-12345678" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem;">
+            </div>
 
-        <div style="margin-bottom: 20px;">
-            <label for="correo">Correo Electrónico Institucional:</label>
-            <input type="email" id="correo" name="correo" placeholder="usuario@uc.edu.ve" required>
-        </div>
+            <div style="margin-bottom: 22px;">
+                <label for="correo" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">
+                    Correo Electrónico Institucional:
+                </label>
+                <input type="email" id="correo" name="correo" placeholder="usuario@uc.edu.ve" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem;">
+            </div>
 
-        <input type="submit" value="Verificar Datos" class="primary" style="width: 100%;">
-    </form>
-    
-    <footer style="text-align: center; margin-top: 20px; background: transparent; border-top: none; padding: 0;">
-        <p style="margin: 0;"><a href="/login" style="color: var(--primary); font-weight: 600;">Volver al inicio de sesión</a></p>
-    </footer>
-</article>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; border-radius: 6px;">
+                Verificar Datos
+            </button>
+        </form>
+        
+        <hr style="margin: 24px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+        <!-- Pie de tarjeta -->
+        <footer style="text-align: center; font-size: 0.88rem; background: transparent; border-top: none; padding: 0;">
+            <a href="{{ url_for('login') }}" style="color: #1d4ed8; font-weight: 700; text-decoration: none;">
+                ← Volver al inicio de sesión
+            </a>
+        </footer>
+    </article>
+</main>
 {% endblock %}

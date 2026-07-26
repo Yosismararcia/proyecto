@@ -3,39 +3,42 @@
 {% block title %}Iniciar Sesión - SGJC-FaCyT{% endblock %}
 
 {% block content %}
-<main class="container" style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 20px 0;">
-    <article style="max-width: 450px; width: 100%; margin: 0 auto; padding: 30px; border-radius: var(--radius); border: 1px solid var(--border-color); background: #ffffff; box-shadow: var(--shadow-soft);">
-        <header style="text-align: center; margin-bottom: 25px; background: transparent; border-bottom: none; padding: 0;">
-            <h3 style="margin-bottom: 5px; font-weight: 700; color: #0f172a;">¡Bienvenido al SGJC-FaCyT!</h3>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">Ingresa tus credenciales institucionales para acceder</p>
-        </header>
+<main style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 20px;">
+    <article style="max-width: 420px; width: 100%; padding: 32px; border-radius: 12px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);">
+        
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h3 style="margin-bottom: 8px; font-weight: 800; color: #0f172a; font-size: 1.35rem;">¡Bienvenido al SGJC-FaCyT!</h3>
+            <p style="color: #64748b; font-size: 0.9rem; margin: 0; font-weight: 500;">Ingresa tus credenciales institucionales para acceder</p>
+        </div>
 
         <form action="/login" method="POST">
-            <div style="margin-bottom: 15px;">
-                <label for="correo">Correo Electrónico:</label>
-                <input type="email" id="correo" name="correo" placeholder="usuario@uc.edu.ve" required style="margin: 0;">
+            <div style="margin-bottom: 16px;">
+                <label for="correo" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">Correo Electrónico:</label>
+                <input type="email" id="correo" name="correo" placeholder="usuario@uc.edu.ve" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem;">
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label for="contrasena">Contraseña:</label>
-                <input type="password" id="contrasena" name="contrasena" placeholder="••••••••" required style="margin: 0;">
+            <div style="margin-bottom: 22px;">
+                <label for="contrasena" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">Contraseña:</label>
+                <input type="password" id="contrasena" name="contrasena" placeholder="••••••••" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem;">
             </div>
 
-            <input type="submit" value="Ingresar" class="primary" style="width: 100%; margin-top: 5px; font-weight: 700; cursor: pointer;">
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">
+                Ingresar
+            </button>
         </form>
 
-        <hr style="margin: 25px 0; border: 0; border-top: 1px solid var(--border-color);">
+        <hr style="margin: 24px 0; border: 0; border-top: 1px solid #e2e8f0;">
 
-        <footer style="text-align: center; font-size: 0.9rem; background: transparent; border-top: none; padding: 0;">
-            <p style="margin-bottom: 8px;">
-                ¿No tienes una cuenta académica? <a href="/registro" style="font-weight: 600; color: var(--primary);">Regístrate aquí</a>
+        <div style="text-align: center; font-size: 0.88rem; color: #475569;">
+            <p style="margin-bottom: 10px;">
+                ¿No tienes una cuenta académica? <a href="/registro" style="font-weight: 700; color: #1d4ed8; text-decoration: none;">Regístrate aquí</a>
             </p>
-            <p style="margin-bottom: 0;">
-                <a href="/recuperar-acceso" style="color: #c53030; font-weight: 500; text-decoration: none;">
+            <p style="margin: 0;">
+                <a href="/recuperar-acceso" style="color: #dc2626; font-weight: 600; text-decoration: none;">
                     ¿Olvidaste tu contraseña? Recuperar mi cuenta 🔑
                 </a>
             </p>
-        </footer>
+        </div>
     </article>
 </main>
 {% endblock %}

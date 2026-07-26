@@ -3,71 +3,158 @@
 {% block title %}Participantes Inscritos - FaCyT{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+<!-- ENCABEZADO Y ACCIONES PRINCIPALES REDISEÑADO -->
+<div style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; padding: 22px 26px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;">
+    
+    <!-- LADO IZQUIERDO: TÍTULO Y EVENTO (LETRAS MÁS GRANDES Y DESTACADAS) -->
     <div>
-        <h2 style="margin: 0;">📋 Participantes Inscritos</h2>
-        <p style="margin: 0; color: var(--text-muted);">Evento: <strong>{{ evento.titulo }}</strong></p>
+        <h1 style="margin: 0; font-size: 2.1rem; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 12px; letter-spacing: -0.5px;">
+            <i class="fa-solid fa-clipboard-user" style="color: #1d4ed8; font-size: 2.3rem;"></i> Participantes Inscritos
+        </h1>
+        <p style="margin: 10px 0 0 0; font-size: 1.15rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            Evento: 
+            <span style="color: #1d4ed8; background: #eff6ff; padding: 5px 14px; border-radius: 8px; border: 1.5px solid #bfdbfe; font-weight: 800; font-size: 1.05rem;">
+                {{ evento.titulo }}
+            </span>
+        </p>
     </div>
-    <a href="{{ url_for('mis_solicitudes') }}" class="button secondary outline" style="margin: 0;">
-        ⬅️ Volver a mis solicitudes
-    </a>
+
+    <!-- LADO DERECHO: BOTONES DE ACCIÓN DERECHA Y ESTILIZADOS -->
+    <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+        {% if inscritos %}
+        <button onclick="exportarCSV()" style="padding: 12px 22px; font-size: 0.95rem; font-weight: 800; color: #ffffff; background: #16a34a; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3); transition: transform 0.1s ease;">
+            <i class="fa-solid fa-file-excel" style="font-size: 1.1rem;"></i> Exportar a Excel (CSV)
+        </button>
+        {% endif %}
+        
+        <a href="{{ url_for('inicio') }}" style="padding: 12px 22px; font-size: 0.95rem; font-weight: 800; color: #ffffff; background: #0f172a; border: none; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.25); transition: transform 0.1s ease;">
+            <i class="fa-solid fa-house" style="font-size: 1rem;"></i> Volver al Inicio
+        </a>
+    </div>
 </div>
 
-<article class="card-custom" style="margin-bottom: 20px;">
-    <header><i class="fa-solid fa-circle-info"></i> Detalles del Evento</header>
-    <div class="grid">
-        <div><strong>📅 Fecha:</strong> {{ evento.fecha }}</div>
-        <div><strong>⏰ Horario:</strong> {{ evento.hora_inicio }} - {{ evento.hora_fin }}</div>
-        <div><strong>📍 Espacio:</strong> {{ evento.espacio_nombre or evento.espacio or 'Por definir' }}</div>
-        <div><strong>👥 Total Inscritos:</strong> <mark style="background-color: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-weight: bold;">{{ total_inscritos }}</mark></div>
+<!-- TARJETA DE DETALLES DEL EVENTO E INDICADORES -->
+<article class="card-custom" style="margin-bottom: 24px; padding: 22px; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    
+    <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 18px;">
+        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-chart-line" style="color: #1d4ed8; font-size: 1.3rem;"></i> Detalles e Indicadores del Evento
+        </h3>
+    </div>
+    
+    <!-- DATOS LOGÍSTICOS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 20px;">
+        <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 14px;">
+            <i class="fa-solid fa-calendar-day" style="font-size: 1.5rem; color: #1d4ed8;"></i>
+            <div>
+                <span style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Fecha</span>
+                <strong style="font-size: 1.05rem; color: #0f172a;">{{ evento.fecha }}</strong>
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 14px;">
+            <i class="fa-solid fa-clock" style="font-size: 1.5rem; color: #1d4ed8;"></i>
+            <div>
+                <span style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Horario</span>
+                <strong style="font-size: 1.05rem; color: #0f172a;">{{ evento.hora_inicio }} - {{ evento.hora_fin }}</strong>
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 14px;">
+            <i class="fa-solid fa-location-dot" style="font-size: 1.5rem; color: #1d4ed8;"></i>
+            <div>
+                <span style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Espacio / Ubicación</span>
+                <strong style="font-size: 1.05rem; color: #0f172a;">{{ evento.espacio_nombre or evento.espacio or 'Por definir' }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETAS CONTEO DE ASISTENCIA EN TIEMPO REAL -->
+    {% set ns = namespace(asistieron=0, pendientes=0) %}
+    {% for est in inscritos %}
+        {% if est.asistio %}
+            {% set ns.asistieron = ns.asistieron + 1 %}
+        {% else %}
+            {% set ns.pendientes = ns.pendientes + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <div style="background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 12px; padding: 16px; text-align: center;">
+            <span style="font-size: 0.85rem; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">Total Inscritos</span>
+            <div style="font-size: 2.2rem; font-weight: 900; color: #1d4ed8; margin-top: 4px;">{{ total_inscritos }}</div>
+        </div>
+
+        <div style="background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 12px; padding: 16px; text-align: center;">
+            <span style="font-size: 0.85rem; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">Asistieron</span>
+            <div style="font-size: 2.2rem; font-weight: 900; color: #15803d; margin-top: 4px;">{{ ns.asistieron }}</div>
+        </div>
+
+        <div style="background: #fffbeb; border: 2px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center;">
+            <span style="font-size: 0.85rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px;">Pendientes</span>
+            <div style="font-size: 2.2rem; font-weight: 900; color: #d97706; margin-top: 4px;">{{ ns.pendientes }}</div>
+        </div>
     </div>
 </article>
 
-<article class="card-custom">
-    <header><i class="fa-solid fa-users"></i> Lista Oficial de Asistencia</header>
+<!-- TABLA DE LISTA OFICIAL DE ASISTENCIA -->
+<article class="card-custom" style="padding: 22px; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 14px;">
+        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-users-check" style="color: #1d4ed8; font-size: 1.3rem;"></i> Lista Oficial de Asistencia
+        </h3>
+
+        <!-- BUSCADOR RÁPIDO -->
+        {% if inscritos %}
+        <div style="min-width: 280px; flex: 1; max-width: 400px;">
+            <input type="text" id="buscadorTabla" onkeyup="filtrarTabla()" placeholder="🔍 Buscar por nombre, cédula o correo..." style="width: 100%; padding: 10px 16px; font-size: 0.92rem; font-weight: 600; border: 2px solid #cbd5e1; border-radius: 8px; outline: none; background: #f8fafc;">
+        </div>
+        {% endif %}
+    </div>
+
     {% if inscritos %}
         <div class="table-container">
-            <table>
+            <table id="tablaInscritos" style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre Completo</th>
-                        <th>Cédula</th>
-                        <th>Correo Electrónico</th>
-                        <th>Fecha de Inscripción</th>
-                        <th>Asistencia</th>
-                        <th>Acción</th>
+                    <tr style="background: #0f172a; color: #ffffff; font-size: 0.95rem;">
+                        <th style="padding: 14px;">#</th>
+                        <th style="padding: 14px;">Nombre Completo</th>
+                        <th style="padding: 14px;">Cédula</th>
+                        <th style="padding: 14px;">Correo Electrónico</th>
+                        <th style="padding: 14px;">Fecha de Inscripción</th>
+                        <th style="padding: 14px;">Estado</th>
+                        <th style="padding: 14px;">Acción</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody style="font-size: 0.95rem;">
                     {% for estudiante in inscritos %}
-                    <tr>
-                        <td><strong>{{ loop.index }}</strong></td>
-                        <td><strong>{{ estudiante.nombre }}</strong></td>
-                        <td>{{ estudiante.cedula or 'N/A' }}</td>
-                        <td>{{ estudiante.correo }}</td>
-                        <td>{{ estudiante.fecha_inscripcion or 'Registrado' }}</td>
-                        <td>
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 12px; text-align: center;"><strong>{{ loop.index }}</strong></td>
+                        <td style="padding: 12px;"><strong>{{ estudiante.nombre }}</strong></td>
+                        <td style="padding: 12px;">{{ estudiante.cedula or 'N/A' }}</td>
+                        <td style="padding: 12px;">{{ estudiante.correo }}</td>
+                        <td style="padding: 12px;">{{ estudiante.fecha_inscripcion or 'Registrado' }}</td>
+                        <td style="padding: 12px; text-align: center;">
                             {% if estudiante.asistio %}
-                                <mark style="background-color: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: bold;">
+                                <span style="background-color: #dcfce7; color: #166534; padding: 5px 14px; border-radius: 6px; font-weight: 800; font-size: 0.85rem; display: inline-block;">
                                     ✅ Asistió
-                                </mark>
+                                </span>
                             {% else %}
-                                <mark style="background-color: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-weight: bold;">
+                                <span style="background-color: #fef3c7; color: #92400e; padding: 5px 14px; border-radius: 6px; font-weight: 800; font-size: 0.85rem; display: inline-block;">
                                     ⏳ Pendiente
-                                </mark>
+                                </span>
                             {% endif %}
                         </td>
-                        <td>
+                        <td style="padding: 12px; text-align: center;">
                             <form action="{{ url_for('cambiar_asistencia', evento_id=evento.id, usuario_id=estudiante.usuario_id) }}" method="POST" style="margin: 0;">
                                 {% if estudiante.asistio %}
                                     <input type="hidden" name="asistio" value="0">
-                                    <button type="submit" class="outline contrast" style="padding: 2px 8px; font-size: 0.8rem; margin: 0; width: auto;">
+                                    <button type="submit" style="padding: 6px 14px; font-size: 0.85rem; font-weight: 700; background: #fee2e2; color: #991b1b; border: 1.5px solid #fca5a5; border-radius: 6px; cursor: pointer;">
                                         ❌ Cancelar
                                     </button>
                                 {% else %}
                                     <input type="hidden" name="asistio" value="1">
-                                    <button type="submit" class="primary" style="padding: 2px 8px; font-size: 0.8rem; margin: 0; width: auto;">
+                                    <button type="submit" style="padding: 6px 14px; font-size: 0.85rem; font-weight: 700; background: #1d4ed8; color: #ffffff; border: none; border-radius: 6px; cursor: pointer;">
                                         ✅ Confirmar
                                     </button>
                                 {% endif %}
@@ -79,9 +166,72 @@
             </table>
         </div>
     {% else %}
-        <div style="padding: 30px; text-align: center; color: var(--text-muted);">
-            <h5>📌 Aún no hay participantes inscritos registrados en este evento.</h5>
+        <div style="padding: 40px; text-align: center; color: #64748b;">
+            <i class="fa-solid fa-user-slash" style="font-size: 2.5rem; color: #94a3b8; margin-bottom: 12px; display: block;"></i>
+            <h5 style="margin: 0; font-size: 1.05rem; font-weight: 700;">Aún no hay participantes inscritos registrados en este evento.</h5>
         </div>
     {% endif %}
 </article>
+
+<!-- SCRIPTS DE FUNCIONALIDAD -->
+<!-- SCRIPTS DE FUNCIONALIDAD ACTUALIZADOS -->
+<script>
+// 1. Filtrado dinámico por buscador
+function filtrarTabla() {
+    const input = document.getElementById("buscadorTabla");
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById("tablaInscritos");
+    const trs = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < trs.length; i++) {
+        const rowText = trs[i].textContent.toLowerCase();
+        trs[i].style.display = rowText.includes(filter) ? "" : "none";
+    }
+}
+
+// 2. Exportación limpia a CSV (Corrige el '###' en la fecha y cédula para Excel)
+function exportarCSV() {
+    const table = document.getElementById("tablaInscritos");
+    if (!table) return;
+
+    let csv = [];
+    let csvContent = "\uFEFF"; // Carácter UTF-8 BOM para soporte correcto de eñes y acentos en Excel
+
+    const rows = table.querySelectorAll("tr");
+    rows.forEach((row, rowIndex) => {
+        if (row.style.display !== "none") {
+            const cols = row.querySelectorAll("th, td");
+            let rowData = [];
+            
+            // Recorremos omitiendo la última columna ('Acción')
+            for (let i = 0; i < cols.length - 1; i++) {
+                let text = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                text = text.replace("✅ Asistió", "Asistió").replace("⏳ Pendiente", "Pendiente");
+                
+                // Si es fila de datos (rowIndex > 0) y es Cédula (i=2) o Fecha (i=4), forzamos texto literal para Excel
+                if (rowIndex > 0 && (i === 2 || i === 4)) {
+                    rowData.push('="' + text.replace(/"/g, '""') + '"');
+                } else {
+                    rowData.push('"' + text.replace(/"/g, '""') + '"');
+                }
+            }
+            csv.push(rowData.join(";")); // Separador punto y coma ideal para regiones en español
+        }
+    });
+
+    const csvString = csv.join("\n");
+    const blob = new Blob([csvContent + csvString], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    const tituloEvento = "{{ evento.titulo }}".replace(/[^a-zA-Z0-9]/g, "_").substring(0, 30);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Inscritos_${tituloEvento}.csv`);
+    link.style.visibility = "hidden";
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
 {% endblock %}

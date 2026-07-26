@@ -3,104 +3,164 @@
 {% block title %}Difundir Evento - FaCyT{% endblock %}
 
 {% block content %}
-<article class="card-custom">
-    <header>
-        <h3 style="margin:0;"><i class="fa-solid fa-bullhorn text-primary"></i> Plantilla de Invitación y Divulgación</h3>
-    </header>
+<!-- ENCABEZADO PRINCIPAL -->
+<div style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; padding: 22px 26px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;">
+    <div>
+        <h1 style="margin: 0; font-size: 2.1rem; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 12px; letter-spacing: -0.5px;">
+            <i class="fa-solid fa-bullhorn" style="color: #1d4ed8; font-size: 2.3rem;"></i> Difundir Evento
+        </h1>
+        <p style="margin: 6px 0 0 0; font-size: 1.05rem; font-weight: 600; color: #64748b;">
+            Plantilla oficial de invitación generada dinámicamente para canales institucionales.
+        </p>
+    </div>
 
-    <p style="color: #64748b;">A continuación se presenta la tarjeta oficial de invitación generada dinámicamente con los detalles del evento:</p>
+    <div style="margin-left: auto;">
+        <a href="{{ url_for('inicio') }}" style="padding: 12px 22px; font-size: 0.95rem; font-weight: 800; color: #ffffff; background: #0f172a; border: none; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.25);">
+            <i class="fa-solid fa-house"></i> Volver al Inicio
+        </a>
+    </div>
+</div>
 
-    <!-- VISTA PREVIA FORMATO TARJETA -->
-    <div style="background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-        <div style="text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 0.75rem; margin-bottom: 1rem;">
-            <h5 style="margin:0; color: #0f172a; font-weight: 800;">UNIVERSIDAD DE CARABOBO</h5>
-            <h6 style="margin:0; color: #0284c7; font-size: 0.9rem;">FACULTAD EXPERIMENTAL DE CIENCIAS Y TECNOLOGÍA (FACYT)</h6>
+<!-- TARJETA / AFICHE OFICIAL DE INVITACIÓN -->
+<article class="card-custom" style="padding: 28px; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); margin-bottom: 24px;">
+    
+    <div style="max-width: 800px; margin: 0 auto; background: #ffffff; border: 2.5px solid #1d4ed8; border-radius: 14px; padding: 32px; box-shadow: 0 10px 25px -5px rgba(29, 78, 216, 0.12); position: relative; overflow: hidden;">
+        
+        <!-- CINTA DECORATIVA SUPERIOR -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(90deg, #1d4ed8, #0284c7);"></div>
+
+        <!-- LOGO Y MEMBRETE FACYT -->
+        <div style="text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 22px;">
+            <h5 style="margin: 0; color: #0f172a; font-size: 1.15rem; font-weight: 900; letter-spacing: 1px;">UNIVERSIDAD DE CARABOBO</h5>
+            <h6 style="margin: 4px 0 0 0; color: #1d4ed8; font-size: 0.98rem; font-weight: 800; letter-spacing: 0.5px;">FACULTAD EXPERIMENTAL DE CIENCIAS Y TECNOLOGÍA (FACYT)</h6>
         </div>
 
-        <h4 style="text-align: center; color: #1e293b; margin-top: 1rem; margin-bottom: 1rem; text-transform: uppercase;">
-            📢 INVITACIÓN: {{ evento.titulo }}
-        </h4>
+        <!-- TÍTULO DEL EVENTO -->
+        <h2 style="text-align: center; color: #0f172a; font-size: 1.65rem; font-weight: 900; margin: 0 0 20px 0; line-height: 1.35; text-transform: uppercase;">
+            📢 INVITACIÓN: <span style="color: #1d4ed8;">{{ evento.titulo }}</span>
+        </h2>
 
-        <p style="font-size: 0.95rem; line-height: 1.5; color: #334155;">
-            Se invita cordialmente a toda la comunidad universitaria y público general a participar en la actividad académica del tipo <strong>{{ evento.tipo_actividad or 'Evento Académico' }}</strong>, organizada por el Departamento/Dependencia de <strong>{{ evento.departamento or 'FaCyT' }}</strong>.
+        <!-- TEXTO DE INVITACIÓN -->
+        <p style="font-size: 1.05rem; line-height: 1.7; color: #334155; text-align: justify; margin-bottom: 22px;">
+            Se invita cordialmente a toda la comunidad universitaria y público general a participar en la actividad académica del tipo <strong style="color: #0f172a;">{{ evento.tipo_actividad or 'Evento Académico' }}</strong>, organizada por la dependencia/departamento de <strong style="color: #0f172a;">{{ evento.departamento or 'FaCyT' }}</strong>.
         </p>
 
-        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #0284c7; margin: 1rem 0;">
-            <p style="margin-bottom: 0.5rem;"><strong><i class="fa-solid fa-align-left"></i> Descripción / Propósito:</strong></p>
-            <p style="margin:0; color: #475569; font-style: italic;">{{ evento.descripcion or 'Sin descripción adicional proporcionada.' }}</p>
+        <!-- CAJA DE DESCRIPCIÓN -->
+        <div style="background: #f8fafc; padding: 18px 20px; border-radius: 10px; border-left: 5px solid #1d4ed8; margin-bottom: 22px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+            <p style="margin: 0 0 6px 0; font-size: 0.95rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-align-left" style="color: #1d4ed8;"></i> Descripción / Propósito:
+            </p>
+            <p style="margin: 0; color: #475569; font-size: 1rem; line-height: 1.6; font-style: italic;">
+                {{ evento.descripcion or 'Sin descripción adicional proporcionada.' }}
+            </p>
         </div>
 
-        <div class="grid" style="margin-top: 1rem; background: #f1f5f9; padding: 1rem; border-radius: 8px;">
-            <div>
-                <strong><i class="fa-solid fa-calendar"></i> Fecha:</strong> {{ evento.fecha_formateada }}
+        <!-- GRID DE DETALLES LOGÍSTICOS -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; background: #eff6ff; border: 1.5px solid #bfdbfe; padding: 20px; border-radius: 10px; margin-bottom: 22px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-calendar-day" style="font-size: 1.6rem; color: #1d4ed8;"></i>
+                <div>
+                    <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Fecha</span>
+                    <strong style="font-size: 1.02rem; color: #0f172a;">{{ evento.fecha_formateada or evento.fecha }}</strong>
+                </div>
             </div>
-            <div>
-                <strong><i class="fa-solid fa-clock"></i> Hora:</strong> {{ evento.inicio_formateado }} - {{ evento.fin_formateado }}
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-clock" style="font-size: 1.6rem; color: #1d4ed8;"></i>
+                <div>
+                    <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Horario</span>
+                    <strong style="font-size: 1.02rem; color: #0f172a;">{{ evento.inicio_formateado or evento.hora_inicio }} - {{ evento.fin_formateado or evento.hora_fin }}</strong>
+                </div>
             </div>
-            <div>
-                <strong><i class="fa-solid fa-location-dot"></i> Lugar:</strong> {{ evento.espacio_nombre or 'Por definir' }}
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-location-dot" style="font-size: 1.6rem; color: #1d4ed8;"></i>
+                <div>
+                    <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Lugar / Espacio</span>
+                    <strong style="font-size: 1.02rem; color: #0f172a;">{{ evento.espacio_nombre or evento.espacio or 'Por definir' }}</strong>
+                </div>
             </div>
         </div>
 
         {% if evento.enlace_virtual %}
-        <div style="margin-top: 1rem; text-align: center;">
-            <a href="{{ evento.enlace_virtual }}" target="_blank" role="button" class="contrast" style="padding: 0.4rem 1rem; font-size: 0.85rem;">
-                <i class="fa-solid fa-video"></i> Unirse a Transmisión Virtual
+        <div style="text-align: center; margin-bottom: 22px;">
+            <a href="{{ evento.enlace_virtual }}" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; font-size: 1rem; font-weight: 800; color: #ffffff; background: #0284c7; border-radius: 8px; text-decoration: none; box-shadow: 0 3px 8px rgba(2, 132, 199, 0.3);">
+                <i class="fa-solid fa-video" style="font-size: 1.1rem;"></i> Unirse a Transmisión Virtual
             </a>
         </div>
         {% endif %}
 
-        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: #64748b; margin-bottom: 0;">
-            <em>Atentamente,<br>Comité Organizador / Gestión de Eventos FaCyT</em>
+        <!-- FIRMA INSTITUCIONAL -->
+        <p style="text-align: center; margin: 24px 0 0 0; font-size: 0.95rem; color: #64748b; font-weight: 600;">
+            <em>Atentamente,<br><strong style="color: #0f172a;">Comité Organizador / Gestión de Eventos FaCyT</strong></em>
+        </p>
+    </div>
+</article>
+
+<!-- PANEL DE BOTONES DE DIFUSIÓN RÁPIDA -->
+<article class="card-custom" style="padding: 24px; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    
+    <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-share-nodes" style="color: #1d4ed8; font-size: 1.3rem;"></i> Canales de Difusión Directa
+        </h3>
+        <p style="margin: 6px 0 0 0; font-size: 0.95rem; font-weight: 600; color: #64748b;">
+            Selecciona una vía para publicar o enviar esta invitación de forma automática:
         </p>
     </div>
 
-    <!-- PANEL DE DIVULGACIÓN E INTEGRACIONES -->
-    <h4><i class="fa-solid fa-share-nodes"></i> Canales de Difusión Directa</h4>
-    <p style="font-size: 0.9rem; color: #64748b;">Seleccione una vía para publicar o enviar este mensaje de forma automática:</p>
-
-    <div class="grid">
-        <!-- 1. Enviar por Telegram -->
-        <button onclick="compartirTelegram()" style="background-color: #229ED9; border-color: #229ED9;">
-            <i class="fa-brands fa-telegram"></i> Difundir por Telegram
+    <!-- GRID DE BOTONES CON ICONOS DESTACADOS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+        
+        <!-- 1. WHATSAPP -->
+        <button onclick="compartirWhatsApp()" style="padding: 14px 20px; font-size: 0.98rem; font-weight: 800; color: #ffffff; background: #25D366; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px -1px rgba(37, 211, 102, 0.25);">
+            <i class="fa-brands fa-whatsapp" style="font-size: 1.4rem;"></i> Compartir WhatsApp
         </button>
 
-        <!-- 2. Enviar por Correo Electrónico -->
-        <button onclick="compartirCorreo()" style="background-color: #ea4335; border-color: #ea4335;">
-            <i class="fa-solid fa-envelope"></i> Enviar por Correo
+        <!-- 2. TELEGRAM -->
+        <button onclick="compartirTelegram()" style="padding: 14px 20px; font-size: 0.98rem; font-weight: 800; color: #ffffff; background: #229ED9; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px -1px rgba(34, 158, 217, 0.25);">
+            <i class="fa-brands fa-telegram" style="font-size: 1.4rem;"></i> Difundir por Telegram
         </button>
 
-        <!-- 3. Copiar Texto Portapapeles -->
-        <button onclick="copiarTexto()" class="secondary">
-            <i class="fa-solid fa-copy"></i> Copiar Formato Texto
+        <!-- 3. CORREO ELECTRÓNICO -->
+        <button onclick="compartirCorreo()" style="padding: 14px 20px; font-size: 0.98rem; font-weight: 800; color: #ffffff; background: #ea4335; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px -1px rgba(234, 67, 53, 0.25);">
+            <i class="fa-solid fa-envelope" style="font-size: 1.3rem;"></i> Enviar por Correo
+        </button>
+
+        <!-- 4. COPIAR TEXTO -->
+        <button onclick="copiarTexto()" style="padding: 14px 20px; font-size: 0.98rem; font-weight: 800; color: #0f172a; background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <i class="fa-solid fa-copy" style="font-size: 1.2rem; color: #334155;"></i> Copiar Formato Texto
         </button>
     </div>
 
-    <textarea id="texto-invitacion" style="opacity: 0; height: 1px; position: absolute;">
+    <!-- TEXTAREA OCULTO PARA COPIAR MENSAJE -->
+    <textarea id="texto-invitacion" style="opacity: 0; height: 1px; position: absolute; pointer-events: none;">
 UNIVERSIDAD DE CARABOBO - FACYT
-INVITACIÓN ACADÉMICA: {{ evento.titulo }}
+📢 INVITACIÓN ACADÉMICA: {{ evento.titulo }}
 
 Departamento: {{ evento.departamento or 'FaCyT' }}
 Tipo: {{ evento.tipo_actividad or 'Evento Académico' }}
 
-📅 Fecha: {{ evento.fecha_formateada }}
-⏰ Hora: {{ evento.inicio_formateado }} - {{ evento.fin_formateado }}
-📍 Lugar: {{ evento.espacio or 'Por definir' }}
+📅 Fecha: {{ evento.fecha_formateada or evento.fecha }}
+⏰ Hora: {{ evento.inicio_formateado or evento.hora_inicio }} - {{ evento.fin_formateado or evento.hora_fin }}
+📍 Lugar: {{ evento.espacio_nombre or evento.espacio or 'Por definir' }}
 {% if evento.enlace_virtual %}🔗 Enlace Virtual: {{ evento.enlace_virtual }}{% endif %}
 
 Descripción: {{ evento.descripcion or 'Sin descripción' }}
 
-¡Contamos con tu asistencia!
+¡Contamos con tu valiosa asistencia!
     </textarea>
-
-    <div style="margin-top: 1.5rem;">
-        <a href="{{ url_for('inicio') }}" class="outline secondary"><i class="fa-solid fa-arrow-left"></i> Volver al Panel</a>
-    </div>
 </article>
 
+<!-- SCRIPTS DE COMPARTIR -->
 <script>
 function obtenerMensaje() {
-    return document.getElementById('texto-invitacion').value;
+    return document.getElementById('texto-invitacion').value.trim();
+}
+
+function compartirWhatsApp() {
+    const texto = encodeURIComponent(obtenerMensaje());
+    window.open(`https://api.whatsapp.com/send?text=${texto}`, '_blank');
 }
 
 function compartirTelegram() {
@@ -109,7 +169,7 @@ function compartirTelegram() {
 }
 
 function compartirCorreo() {
-    const asunto = encodeURIComponent("Invitación: {{ evento.titulo }} - FaCyT");
+    const asunto = encodeURIComponent("Invitación Académica: {{ evento.titulo }} - FaCyT");
     const cuerpo = encodeURIComponent(obtenerMensaje());
     window.open(`mailto:?subject=${asunto}&body=${cuerpo}`, '_blank');
 }
@@ -117,7 +177,7 @@ function compartirCorreo() {
 function copiarTexto() {
     const copyText = document.getElementById("texto-invitacion");
     navigator.clipboard.writeText(copyText.value).then(() => {
-        alert("¡Texto de invitación copiado al portapapeles!");
+        alert("¡El texto de la invitación ha sido copiado exitosamente al portapapeles!");
     });
 }
 </script>

@@ -1,70 +1,92 @@
-{% extends "base.html" %}
-
-{% block title %}Editar Evento - SGJC FaCyT{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-<div style="max-width: 650px; margin: 0 auto;">
-    <h2>✏️ Modificar Evento Oficial</h2>
-    <p><small>Edite los aspectos informativos y la logística del evento seleccionado.</small></p>
+<div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    
+    <!-- ENCABEZADO DEL FORMULARIO -->
+    <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 25px;">
+        <h4 style="margin: 0 0 6px 0 !important; font-size: 22px !important; font-weight: 700 !important; color: #0f172a !important; display: flex; align-items: center; gap: 8px;">
+            <span>✏️</span> Modificar Evento Oficial
+        </h4>
+        <p style="margin: 0 !important; font-size: 14px !important; color: #64748b !important;">
+            Edite los aspectos informativos y la logística del evento seleccionado.
+        </p>
+    </div>
 
-    <article>
-        <form action="{{ url_for('admin_editar_evento', evento_id=evento.id) }}" method="POST">            
-            <label for="titulo">
-                Título de la Actividad / Congreso:
-                <input type="text" id="titulo" name="titulo" value="{{ evento.titulo }}" required>
-            </label>
-
-            <label for="tipo_actividad">
-                Tipo de Actividad:
-                <select id="tipo_actividad" name="tipo_actividad" required>
-                    <option value="Congreso" {% if evento.tipo_actividad == 'Congreso' %}selected{% endif %}>Congreso</option>
-                    <option value="Taller" {% if evento.tipo_actividad == 'Taller' %}selected{% endif %}>Taller</option>
+    <!-- FORMULARIO DE EDICIÓN -->
+    <form action="{{ url_for('admin_editar_evento', evento_id=evento.id) }}" method="POST">
+        
+        <!-- Título y Tipo de Actividad (2 Columnas) -->
+        <div class="row g-3" style="margin-bottom: 20px !important;">
+            <div class="col-md-8">
+                <label style="font-size: 13px !important; font-weight: 700 !important; color: #334155 !important; display: block; margin-bottom: 6px;">
+                    TÍTULO DE LA ACTIVIDAD / CONGRESO
+                </label>
+                <input type="text" name="titulo" value="{{ evento.titulo }}" class="form-control" style="font-size: 15px !important; padding: 11px 14px !important; border-radius: 8px !important;" required>
+            </div>
+            <div class="col-md-4">
+                <label style="font-size: 13px !important; font-weight: 700 !important; color: #334155 !important; display: block; margin-bottom: 6px;">
+                    TIPO DE ACTIVIDAD
+                </label>
+                <select name="tipo_actividad" class="form-select" style="font-size: 15px !important; padding: 11px 14px !important; border-radius: 8px !important; height: auto !important;" required>
                     <option value="Conferencia" {% if evento.tipo_actividad == 'Conferencia' %}selected{% endif %}>Conferencia</option>
-                    <option value="Simposio" {% if evento.tipo_actividad == 'Simposio' %}selected{% endif %}>Simposio</option>
-                    <option value="Jornada" {% if evento.tipo_actividad == 'Jornada' %}selected{% endif %}>Jornada</option>
+                    <option value="Taller" {% if evento.tipo_actividad == 'Taller' %}selected{% endif %}>Taller</option>
+                    <option value="Seminario" {% if evento.tipo_actividad == 'Seminario' %}selected{% endif %}>Seminario</option>
+                    <option value="Congreso" {% if evento.tipo_actividad == 'Congreso' %}selected{% endif %}>Congreso</option>
                     <option value="Otro" {% if evento.tipo_actividad == 'Otro' %}selected{% endif %}>Otro</option>
                 </select>
-            </label>
-
-            <div class="grid">
-                <div>
-                    <label for="fecha">
-                        Fecha del Evento:
-                        <input type="date" id="fecha" name="fecha" value="{{ evento.fecha }}" required>
-                    </label>
-                </div>
-                <div>
-                    <label for="hora_inicio">
-                        Hora Inicio:
-                        <input type="time" id="hora_inicio" name="hora_inicio" value="{{ evento.hora_inicio }}" required>
-                    </label>
-                </div>
-                <div>
-                    <label for="hora_fin">
-                        Hora Finalización:
-                        <input type="time" id="hora_fin" name="hora_fin" value="{{ evento.hora_fin }}" required>
-                    </label>
-                </div>
             </div>
+        </div>
 
-            <label for="espacio_id">
-                Espacio Asignado:
-                <select id="espacio_id" name="espacio_id" required>
-                    {% for espacio in espacios %}
-                        <option value="{{ espacio.id }}" {% if evento.espacio_id == espacio.id %}selected{% endif %}>
-                            {{ espacio.nombre }} (Capacidad: {{ espacio.capacidad }})
-                        </option>
-                    {% endfor %}
-                </select>
-            </label>
-
-            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
-                <a href="/admin" role="button" class="secondary outline" style="margin: 0;">Cancelar</a>
-                <button type="submit" style="margin: 0; background-color: #059669; border-color: #059669; color: white;">
-                    Actualizar Cambios
-                </button>
+        <!-- Fecha, Hora Inicio y Hora Fin (3 Columnas) -->
+        <div class="row g-3" style="margin-bottom: 20px !important;">
+            <div class="col-md-4">
+                <label style="font-size: 13px !important; font-weight: 700 !important; color: #334155 !important; display: block; margin-bottom: 6px;">
+                    FECHA DEL EVENTO
+                </label>
+                <input type="date" name="fecha" value="{{ evento.fecha }}" class="form-control" style="font-size: 15px !important; padding: 11px 14px !important; border-radius: 8px !important;" required>
             </div>
-        </form>
-    </article>
+            <div class="col-md-4">
+                <label style="font-size: 13px !important; font-weight: 700 !important; color: #334155 !important; display: block; margin-bottom: 6px;">
+                    HORA INICIO
+                </label>
+                <input type="time" name="hora_inicio" value="{{ evento.hora_inicio }}" class="form-control" style="font-size: 15px !important; padding: 11px 14px !important; border-radius: 8px !important;" required>
+            </div>
+            <div class="col-md-4">
+                <label style="font-size: 13px !important; font-weight: 700 !important; color: #334155 !important; display: block; margin-bottom: 6px;">
+                    HORA FINALIZACIÓN
+                </label>
+                <input type="time" name="hora_fin" value="{{ evento.hora_fin }}" class="form-control" style="font-size: 15px !important; padding: 11px 14px !important; border-radius: 8px !important;" required>
+            </div>
+        </div>
+
+        <!-- Selección de Espacio -->
+        <div style="margin-bottom: 25px !important;">
+            <label style="font-size: 13px !important; font-weight: 700 !important; color: #334155 !important; display: block; margin-bottom: 6px;">
+                ESPACIO ASIGNADO
+            </label>
+            <select name="espacio_id" class="form-select" style="font-size: 15px !important; padding: 11px 14px !important; border-radius: 8px !important; height: auto !important;" required>
+                {% for esp in espacios %}
+                    <option value="{{ esp.id }}" {% if esp.id == evento.espacio_id %}selected{% endif %}>
+                        🏢 {{ esp.nombre }} (Capacidad: {{ esp.capacidad }} personas)
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <hr style="border-top: 1px solid #e2e8f0 !important; margin: 25px 0 !important;">
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary" style="font-size: 15px !important; font-weight: 600 !important; padding: 11px 24px !important; border-radius: 8px !important;">
+                ⬅️ Cancelar
+            </a>
+            <button type="submit" class="btn btn-success" style="background-color: #16a34a !important; border: none !important; font-size: 15px !important; font-weight: 700 !important; padding: 12px 28px !important; border-radius: 8px !important; box-shadow: 0 4px 6px rgba(22, 163, 74, 0.25);">
+                💾 Guardar Cambios
+            </button>
+        </div>
+
+    </form>
+
 </div>
 {% endblock %}

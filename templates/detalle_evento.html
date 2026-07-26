@@ -5,160 +5,184 @@
 {% block content %}
 {% set rol_limpio = (session.get('usuario_rol') or session.get('rol') or '')|lower %}
 
-<article class="card-custom">
-    <header>
-        <h3>📌 {{ evento.titulo }}</h3>
-    </header>
+<!-- ========================================================= -->
+<!-- 1. TARJETA PRINCIPAL DE INFORMACIÓN LOGÍSTICA             -->
+<!-- ========================================================= -->
+<div style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+    <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 18px;">
+        <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px; line-height: 1.3;">
+            <i class="fa-solid fa-graduation-cap" style="color: #1d4ed8;"></i> {{ evento.titulo }}
+        </h2>
+    </div>
     
-    <div class="grid">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
         <div>
-            <p><strong>📍 Lugar:</strong> {{ evento.espacio_nombre or 'Por definir' }}</p>
-            <p><strong>👤 Ponente / Organizador:</strong> {{ evento.ponente_nombre }}</p>
+            <div style="font-size: 0.9rem; color: #334155; margin-bottom: 10px; font-weight: 600;">
+                <i class="fa-solid fa-location-dot" style="color: #1d4ed8; width: 20px; text-align: center;"></i>
+                <strong>Lugar:</strong> {{ evento.espacio_nombre or 'Por definir' }}
+            </div>
+            <div style="font-size: 0.9rem; color: #334155; font-weight: 600;">
+                <i class="fa-solid fa-user-tie" style="color: #1d4ed8; width: 20px; text-align: center;"></i>
+                <strong>Ponente / Organizador:</strong> {{ evento.ponente_nombre }}
+            </div>
         </div>
         <div>
-            <p><strong>🗓 Fecha:</strong> {{ evento.fecha }}</p>
-            <p><strong>🕒 Horario:</strong> {{ evento.hora_inicio }} - {{ evento.hora_fin }}</p>
-            
-            {% if inscripcion and inscripcion.asistio %}
-                <a href="/evento/{{ evento.id }}/certificado" class="button primary" target="_blank" style="margin-top: 10px;">
-                    📄 Descargar Certificado Digital (PDF + QR)
-                </a>
-            {% endif %}
+            <div style="font-size: 0.9rem; color: #334155; margin-bottom: 10px; font-weight: 600;">
+                <i class="fa-solid fa-calendar-days" style="color: #1d4ed8; width: 20px; text-align: center;"></i>
+                <strong>Fecha:</strong> {{ evento.fecha }}
+            </div>
+            <div style="font-size: 0.9rem; color: #334155; font-weight: 600;">
+                <i class="fa-solid fa-clock" style="color: #1d4ed8; width: 20px; text-align: center;"></i>
+                <strong>Horario:</strong> {{ evento.hora_inicio }} - {{ evento.hora_fin }}
+            </div>
         </div>
     </div>
-</article>
+
+    {% if inscripcion and inscripcion.asistio %}
+        <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+            <a href="/evento/{{ evento.id }}/certificado" class="btn btn-primary" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 800;">
+                <i class="fa-solid fa-file-pdf"></i> Descargar Certificado Digital
+            </a>
+        </div>
+    {% endif %}
+</div>
 
 <!-- ========================================================= -->
-<!-- SECCIÓN DE VOLUNTARIADO UNIFICADA                         -->
+<!-- 2. SECCIÓN DE VOLUNTARIADO UNIFICADA                      -->
 <!-- ========================================================= -->
-<hr style="margin: 2rem 0;">
-<section>
-    <h3 style="margin-bottom: 1.5rem;">
-        <i class="fa-solid fa-hands-holding-circle"></i> Oportunidades de Voluntariado
-    </h3>
+<div style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+    <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-hands-holding-circle" style="color: #1d4ed8;"></i> Oportunidades de Voluntariado
+        </h3>
+    </div>
     
     <!-- Formulario para que el Admin/Profesor cree tareas -->
     {% if rol_limpio in ['admin', 'administrador', 'profesor', 'ponente', 'administrativo'] %}
-    <details style="margin-bottom: 2rem;">
-        <summary role="button" class="secondary outline">
-            <i class="fa-solid fa-plus-circle"></i> Añadir nueva tarea de staff
+    <details style="margin-bottom: 24px; background-color: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden;">
+        <summary style="font-weight: 800; color: #0f172a; cursor: pointer; padding: 12px 16px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; user-select: none;">
+            <i class="fa-solid fa-plus-circle" style="color: #1d4ed8;"></i> Añadir nueva tarea de staff
         </summary>
-        <article>
-            <form action="{{ url_for('crear_tarea_voluntariado', evento_id=evento.id) }}" method="POST">
-                <div class="grid">
-                    <label>Nombre de la Tarea
-                        <input type="text" name="titulo_tarea" placeholder="Ej: Registro y Protocolo" required>
-                    </label>
-                    <label>Cupos Necesarios
-                        <input type="number" name="cupos_disponibles" placeholder="Ej: 5" required min="1">
-                    </label>
-                    <label>Horas a Acreditar
-                        <input type="number" name="horas_acreditadas" placeholder="Ej: 10" required min="1">
-                    </label>
+        <div style="padding: 18px; border-top: 1px solid #cbd5e1; background: #ffffff;">
+            <form action="{{ url_for('crear_tarea_voluntariado', evento_id=evento.id) }}" method="POST" style="margin: 0;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 14px;">
+                    <div>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; text-transform: uppercase;">Nombre de la Tarea:</label>
+                        <input type="text" name="titulo_tarea" placeholder="Ej: Registro y Protocolo" required style="width: 100%; padding: 10px 12px; border: 2px solid #64748b; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #0f172a; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; text-transform: uppercase;">Cupos Necesarios:</label>
+                        <input type="number" name="cupos_disponibles" placeholder="Ej: 5" required min="1" style="width: 100%; padding: 10px 12px; border: 2px solid #64748b; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #0f172a; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; text-transform: uppercase;">Horas a Acreditar:</label>
+                        <input type="number" name="horas_acreditadas" placeholder="Ej: 10" required min="1" style="width: 100%; padding: 10px 12px; border: 2px solid #64748b; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #0f172a; box-sizing: border-box;">
+                    </div>
                 </div>
-                <label>Descripción de las funciones
-                    <textarea name="descripcion" placeholder="Explica brevemente qué hará el estudiante..." required></textarea>
-                </label>
-                <button type="submit">Crear Oportunidad</button>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; text-transform: uppercase;">Descripción de las funciones:</label>
+                    <textarea name="descripcion" rows="3" placeholder="Explica brevemente qué hará el estudiante..." required style="width: 100%; padding: 10px 12px; border: 2px solid #64748b; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #0f172a; box-sizing: border-box;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Crear Oportunidad
+                </button>
             </form>
-        </article>
+        </div>
     </details>
     {% endif %}
 
-    <!-- Listado de tareas disponibles con diseño vertical estructurado -->
-    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- Listado de tareas disponibles -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
         {% for tarea in tareas %}
         {% set cupos_max = tarea.cupos_disponibles if tarea.cupos_disponibles is not none else (tarea.cupos_disponibles or 0) %}
-        <article class="card-custom" style="margin-bottom: 0;">
-            <header>
-                <h4 style="margin: 0;">{{ tarea.titulo_tarea or tarea.titulo_tarea }}</h4>
-            </header>
+        <div style="border: 2px solid #e2e8f0; border-radius: 8px; padding: 16px; background: #ffffff;">
+            <h4 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">
+                {{ tarea.titulo_tarea or tarea.titulo_tarea }}
+            </h4>
             
-            <p><small>{{ tarea.descripcion }}</small></p>
+            <p style="font-size: 0.88rem; color: #475569; font-weight: 500; margin: 0 0 12px 0; line-height: 1.4;">
+                {{ tarea.descripcion }}
+            </p>
             
-            <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
-                <p style="margin: 0;">
-                    <strong><i class="fa-solid fa-clock"></i> Acredita:</strong> {{ tarea.horas_acreditadas }} horas
-                </p>
-                <p style="margin: 0;">
-                    <strong><i class="fa-solid fa-users"></i> Cupos:</strong> {{ tarea.ocupados or 0 }} / {{ cupos_max }}
-                </p>
+            <div style="display: flex; gap: 20px; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;">
+                <span><i class="fa-solid fa-clock" style="color: #1d4ed8;"></i> <strong>Acredita:</strong> {{ tarea.horas_acreditadas }} horas</span>
+                <span><i class="fa-solid fa-users" style="color: #1d4ed8;"></i> <strong>Cupos:</strong> {{ tarea.ocupados or 0 }} / {{ cupos_max }}</span>
             </div>
 
             <!-- VISTA PARA ESTUDIANTES -->
             {% if rol_limpio in ['estudiante', 'student'] %}
-                <footer style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color, #e2e8f0);">
+                <div style="padding-top: 12px; border-top: 1px solid #f1f5f9;">
                     {% if tarea.mi_estado == 'postulado' %}
-                        <div style="background-color: #fef3c7; color: #92400e; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center;">
+                        <div style="background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 10px; border-radius: 6px; font-weight: 800; font-size: 0.85rem; text-align: center;">
                             ⏳ Solicitud Enviada (Pendiente de Aprobación)
                         </div>
                     {% elif tarea.mi_estado == 'aprobado' %}
-                        <div style="background-color: #d1fae5; color: #065f46; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center;">
+                        <div style="background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; padding: 10px; border-radius: 6px; font-weight: 800; font-size: 0.85rem; text-align: center;">
                             ✅ ¡Postulación Aprobada! Formas parte del staff
                         </div>
                     {% elif tarea.mi_estado == 'rechazado' %}
-                        <div style="background-color: #fee2e2; color: #991b1b; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center;">
+                        <div style="background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 10px; border-radius: 6px; font-weight: 800; font-size: 0.85rem; text-align: center;">
                             ❌ Solicitud No Aprobada
                         </div>
                     {% else %}
                         {% if (tarea.ocupados or 0) < cupos_max %}
-                            <form action="{{ url_for('postular_tarea', tarea_id=tarea.id) }}" method="POST" style="margin-bottom: 0;">
+                            <form action="{{ url_for('postular_tarea', tarea_id=tarea.id) }}" method="POST" style="margin: 0;">
                                 <input type="hidden" name="evento_id" value="{{ evento.id }}">
-                                <button type="submit" class="outline" style="width: 100%; margin-bottom: 0;">
+                                <button type="submit" class="btn btn-secondary" style="width: 100%;">
                                     <i class="fa-solid fa-hand"></i> Postularme
                                 </button>
                             </form>
                         {% else %}
-                            <button class="secondary outline" style="width: 100%; margin-bottom: 0;" disabled>
+                            <button class="btn" style="width: 100%; background: #e2e8f0; color: #64748b; cursor: not-allowed;" disabled>
                                 Cupos Llenos
                             </button>
                         {% endif %}
                     {% endif %}
-                </footer>
+                </div>
             {% endif %}
 
             <!-- VISTA PARA ADMINISTRADORES / PROFESORES (PANEL DE GESTIÓN DE POSTULANTES) -->
             {% if rol_limpio in ['admin', 'administrador', 'profesor', 'ponente', 'administrativo'] %}
-                <footer style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color, #e2e8f0);">
-                    <details style="margin: 0;">
-                        <summary role="button" class="secondary outline" style="padding: 6px 12px; font-size: 0.85rem; width: auto; display: inline-block;">
+                <div style="padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                    <details>
+                        <summary style="cursor: pointer; font-size: 0.85rem; font-weight: 800; color: #1d4ed8; user-select: none;">
                             📋 Ver Postulantes ({{ (tarea.postulaciones|length) if tarea.postulaciones else 0 }})
                         </summary>
                         {% if tarea.postulaciones %}
-                            <div style="overflow-x: auto; margin-top: 10px;">
-                                <table style="margin: 0; font-size: 0.85rem; width: 100%;">
+                            <div style="overflow-x: auto; margin-top: 12px;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
                                     <thead>
-                                        <tr>
-                                            <th>Estudiante</th>
-                                            <th>Estado</th>
-                                            <th style="text-align: center;">Acciones</th>
+                                        <tr style="background: #0f172a; color: #ffffff;">
+                                            <th style="padding: 8px 12px; text-align: left;">Estudiante</th>
+                                            <th style="padding: 8px 12px; text-align: left;">Estado</th>
+                                            <th style="padding: 8px 12px; text-align: center;">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for post in tarea.postulaciones %}
-                                        <tr>
-                                            <td><strong>{{ post.estudiante_nombre or post.nombre }}</strong></td>
-                                            <td>
+                                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                                            <td style="padding: 8px 12px; color: #0f172a; font-weight: 700;">{{ post.estudiante_nombre or post.nombre }}</td>
+                                            <td style="padding: 8px 12px;">
                                                 {% if post.estado == 'postulado' %}
-                                                    <span style="color: #d97706; font-weight: bold;">Pendiente</span>
+                                                    <span style="color: #d97706; font-weight: 800;">Pendiente</span>
                                                 {% elif post.estado == 'aprobado' %}
-                                                    <span style="color: #16a34a; font-weight: bold;">Aprobado</span>
+                                                    <span style="color: #16a34a; font-weight: 800;">Aprobado</span>
                                                 {% else %}
-                                                    <span style="color: #dc2626; font-weight: bold;">Rechazado</span>
+                                                    <span style="color: #dc2626; font-weight: 800;">Rechazado</span>
                                                 {% endif %}
                                             </td>
-                                            <td style="text-align: center;">
-                                                <div style="display: flex; gap: 5px; justify-content: center;">
+                                            <td style="padding: 8px 12px; text-align: center;">
+                                                <div style="display: flex; gap: 6px; justify-content: center;">
                                                     {% if post.estado != 'aprobado' %}
                                                     <form action="{{ url_for('gestionar_postulacion', postulacion_id=(post.postulacion_id or post.id), accion='aprobar') }}" method="POST" style="margin: 0;">
                                                         <input type="hidden" name="evento_id" value="{{ evento.id }}">
-                                                        <button type="submit" style="padding: 4px 10px; font-size: 0.75rem; background-color: #16a34a; border-color: #16a34a; color: white; width: auto;">Aprobar</button>
+                                                        <button type="submit" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 800; background-color: #16a34a; border: none; border-radius: 4px; color: white; cursor: pointer;">Aprobar</button>
                                                     </form>
                                                     {% endif %}
                                                     {% if post.estado != 'rechazado' %}
                                                     <form action="{{ url_for('gestionar_postulacion', postulacion_id=(post.postulacion_id or post.id), accion='rechazar') }}" method="POST" style="margin: 0;">
                                                         <input type="hidden" name="evento_id" value="{{ evento.id }}">
-                                                        <button type="submit" class="secondary" style="padding: 4px 10px; font-size: 0.75rem; background-color: #dc2626; border-color: #dc2626; color: white; width: auto;">Rechazar</button>
+                                                        <button type="submit" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 800; background-color: #dc2626; border: none; border-radius: 4px; color: white; cursor: pointer;">Rechazar</button>
                                                     </form>
                                                     {% endif %}
                                                 </div>
@@ -172,76 +196,98 @@
                             <p style="font-size: 0.85rem; margin-top: 10px; color: #64748b; font-style: italic;">Aún no hay postulaciones registradas para esta tarea.</p>
                         {% endif %}
                     </details>
-                </footer>
+                </div>
             {% endif %}
-        </article>
+        </div>
         {% else %}
-        <p><em>No hay oportunidades de voluntariado registradas para este evento.</em></p>
+            <p style="color: #64748b; font-weight: 600; font-style: italic; margin: 0;">No hay oportunidades de voluntariado registradas para este evento.</p>
         {% endfor %}
     </div>
-</section>
+</div>
 
 <!-- ========================================================= -->
-<!-- REPOSITORIO CIENTÍFICO                                    -->
+<!-- 3. REPOSITORIO CIENTÍFICO                                 -->
 <!-- ========================================================= -->
-<article class="card-custom">
-    <header>📚 Repositorio Científico e Información del Evento</header>
+<div style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+    <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-book-bookmark" style="color: #1d4ed8;"></i> Repositorio Científico e Información del Evento
+        </h3>
+    </div>
     
-    <p><strong>Resumen (Abstract):</strong></p>
-    <blockquote style="background: #f8fafc; padding: 15px; border-left: 4px solid var(--primary); border-radius: 6px;">
+    <p style="font-size: 0.85rem; font-weight: 800; color: #0f172a; text-transform: uppercase; margin-bottom: 8px;">
+        Resumen (Abstract):
+    </p>
+    <div style="background: #f8fafc; padding: 16px; border-left: 4px solid #1d4ed8; border-radius: 6px; font-size: 0.92rem; color: #334155; line-height: 1.5; font-weight: 500; margin-bottom: 18px;">
         {{ evento.abstract or 'El resumen científico de este evento no ha sido publicado todavía.' }}
-    </blockquote>
+    </div>
 
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         {% if evento.paper_pdf_url %}
-            <a href="{{ evento.paper_pdf_url }}" target="_blank" role="button" class="outline">
-                📄 Descargar Paper Científico (PDF)
+            <a href="{{ evento.paper_pdf_url }}" target="_blank" class="btn btn-secondary">
+                <i class="fa-solid fa-file-arrow-down"></i> Descargar Paper Científico (PDF)
             </a>
         {% endif %}
 
         {% if evento.codigo_fuente_url %}
-            <a href="{{ evento.codigo_fuente_url }}" target="_blank" role="button" class="secondary outline">
-                💻 Repositorio de Código (GitHub/GitLab)
+            <a href="{{ evento.codigo_fuente_url }}" target="_blank" class="btn btn-secondary">
+                <i class="fa-brands fa-github"></i> Repositorio de Código (GitHub/GitLab)
             </a>
         {% endif %}
 
         {% if rol_limpio in ['profesor', 'ponente', 'administrador', 'admin', 'administrativo'] %}
-        <a href="{{ url_for('evaluar_evento', evento_id=evento.id) }}" class="button contrast outline">
-            👨‍⚖️ Evaluar Trabajo / Ponencia
+        <a href="{{ url_for('evaluar_evento', evento_id=evento.id) }}" class="btn btn-secondary" style="background: #0f172a; color: #ffffff;">
+            <i class="fa-solid fa-gavel"></i> Evaluar Trabajo / Ponencia
         </a>
         {% endif %}
     </div>
-</article>
+</div>
 
 <!-- ========================================================= -->
-<!-- FORO DE DISCUSIÓN ASÍNCRONA                               -->
+<!-- 4. FORO DE DISCUSIÓN ASÍNCRONA                            -->
 <!-- ========================================================= -->
-<article class="card-custom">
-    <header>💬 Foro de Discusión</header>
+<div style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+    <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-comments" style="color: #1d4ed8;"></i> Foro de Discusión
+        </h3>
+    </div>
     
-    <form action="{{ url_for('agregar_pregunta_foro', evento_id=evento.id) }}" method="POST">
-        <label for="pregunta">Hacer una pregunta o comentario:</label>
-        <textarea id="pregunta" name="pregunta" rows="3" placeholder="Escribe tu inquietud o consulta aquí..." required></textarea>
-        <button type="submit" style="width: auto; margin-top: 10px;">📤 Publicar Mensaje</button>
+    <form action="{{ url_for('agregar_pregunta_foro', evento_id=evento.id) }}" method="POST" style="margin-bottom: 24px;">
+        <label for="pregunta" style="display: block; font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; text-transform: uppercase;">
+            Hacer una pregunta o comentario:
+        </label>
+        <textarea id="pregunta" name="pregunta" rows="3" placeholder="Escribe tu inquietud o consulta aquí..." required style="width: 100%; padding: 10px 12px; border: 2px solid #64748b; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #0f172a; box-sizing: border-box; margin-bottom: 12px;"></textarea>
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> Publicar Mensaje
+        </button>
     </form>
 
-    <hr style="margin: 20px 0;">
-
-    <h5>Intervenciones de la Comunidad</h5>
-    {% if preguntas %}
-        {% for preg in preguntas %}
-            <div style="border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #ffffff;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b;">
-                    <strong>👤 {{ preg.usuario_nombre }} ({{ preg.usuario_rol }})</strong>
-                    <span>{{ preg.fecha_publicacion }}</span>
+    <div style="border-top: 2px solid #e2e8f0; padding-top: 18px;">
+        <h4 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0 0 16px 0;">
+            Intervenciones de la Comunidad
+        </h4>
+        {% if preguntas %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for preg in preguntas %}
+                <div style="border: 2px solid #cbd5e1; padding: 14px 16px; border-radius: 8px; background: #f8fafc;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; margin-bottom: 6px;">
+                        <span style="font-weight: 800; color: #0f172a;">
+                            <i class="fa-solid fa-circle-user" style="color: #1d4ed8;"></i> {{ preg.usuario_nombre }} <span style="color: #64748b; font-weight: 600;">({{ preg.usuario_rol }})</span>
+                        </span>
+                        <span style="color: #64748b; font-weight: 600;">{{ preg.fecha_publicacion }}</span>
+                    </div>
+                    <p style="margin: 0; color: #334155; font-size: 0.9rem; font-weight: 600; line-height: 1.4;">{{ preg.mensaje }}</p>
                 </div>
-                <p style="margin: 8px 0 0 0; color: #1e293b;">{{ preg.mensaje }}</p>
+            {% endfor %}
             </div>
-        {% endfor %}
-    {% else %}
-        <p style="color: #64748b; font-style: italic;">Aún no se han realizado intervenciones en este evento. ¡Sé el primero!</p>
-    {% endif %}
-</article>
+        {% else %}
+            <p style="color: #64748b; font-weight: 600; font-style: italic; margin: 0;">Aún no se han realizado intervenciones en este evento. ¡Sé el primero!</p>
+        {% endif %}
+    </div>
+</div>
 
-<a href="{{ url_for('inicio') }}" class="button secondary outline">⬅️ Volver a la Cartelera</a>
+<a href="{{ url_for('inicio') }}" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 800;">
+    <i class="fa-solid fa-arrow-left"></i> Volver a la Cartelera
+</a>
 {% endblock %}

@@ -3,9 +3,17 @@
 {% block title %}Panel de Control - FaCyT{% endblock %}
 
 {% block content %}
+<style>
+    /* Reducir separación vertical entre las secciones del Admin */
+    .admin-section, .card-section, .tabla-container, section {
+        margin-bottom: 12px !important;
+    }
+</style>
+
 <h2>Panel de Control Administrativo 🛠</h2>
 <p>Gestión de reservas de espacios físicos y métricas de ocupación en tiempo real.</p>
 
+<!-- TARJETAS DE MÉTRICAS / RESUMEN -->
 <div style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
     <div style="flex: 1; min-width: 280px; border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; background: #fafafa;">
         <h3 style="margin-top: 0; color: #1f2937;">Salones Más Solicitados 🏫</h3>
@@ -61,27 +69,33 @@
                             <strong>{{ sol.espacio }}</strong><br>
                             <small>{{ sol.fecha }} ({{ sol.hora_inicio }} - {{ sol.hora_fin }})</small>
                         </td>
+
+                        <!-- COLUMNA: ESTADO (ETIQUETAS VISUALES CORREGIDAS) -->
                         <td>
-                            {% if sol.estado == 'pendiente' %}
-                                <mark style="background-color: #fff3cd; color: #664d03; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">⏳ PENDIENTE</mark>
-                            {% elif sol.estado in ['aprobado', 'programado'] %}
-                                <mark style="background-color: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">✅ {{ sol.estado | upper }}</mark>
-                            {% elif sol.estado == 'completado' %}
-                                <mark style="background-color: #cce5ff; color: #004085; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">🏁 COMPLETADO</mark>
+                            {% set est = sol.estado|lower %}
+                            {% if est == 'pendiente' %}
+                                <mark style="background-color: #fff3cd; color: #664d03; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; display: inline-block;">⏳ PENDIENTE</mark>
+                            {% elif est in ['aprobado', 'programado'] %}
+                                <mark style="background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; display: inline-block;">✅ {{ sol.estado | upper }}</mark>
+                            {% elif est == 'cancelado' %}
+                                <mark style="background-color: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; border: 1px solid #cbd5e1; display: inline-block;">🚫 CANCELADO</mark>
+                            {% elif est in ['completado', 'realizado'] %}
+                                <mark style="background-color: #cce5ff; color: #004085; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; display: inline-block;">☑️ REALIZADO</mark>
                             {% else %}
-                                <mark style="background-color: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">❌ {{ sol.estado | upper }}</mark>
+                                <mark style="background-color: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; display: inline-block;">❌ {{ sol.estado | upper }}</mark>
                             {% endif %}
                         </td>
+
+                        <!-- COLUMNA: CONTROL DE ESTADO (SELECT CORREGIDO CON CANCELADO) -->
                         <td style="text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;">
                                 <form action="/admin/actualizar-estado/{{ sol.id }}" method="POST" style="display: inline-flex; gap: 8px; margin: 0; padding: 0;">
-                                    <select name="estado" style="margin-bottom: 0; padding: 4px 8px; font-size: 0.85rem;" required>
-                                        <option value="pendiente" {% if sol.estado == 'pendiente' %}selected{% endif %}>⏳ Pendiente</option>
-                                        <option value="aprobado" {% if sol.estado == 'aprobado' %}selected{% endif %}>✅ Aprobado</option>
-                                        <option value="programado" {% if sol.estado == 'programado' %}selected{% endif %}>📅 Programado</option>
-                                        <option value="postergado" {% if sol.estado == 'postergado' %}selected{% endif %}>🔄 Postergado</option>
-                                        <option value="completado" {% if sol.estado == 'completado' %}selected{% endif %}>🏁 Completado</option>
-                                        <option value="rechazado" {% if sol.estado == 'rechazado' %}selected{% endif %}>❌ Rechazado</option>
+                                    <select name="estado" style="margin-bottom: 0; padding: 4px 8px; font-size: 0.85rem; border-radius: 6px;" required>
+                                        <option value="pendiente" {% if sol.estado|lower == 'pendiente' %}selected{% endif %}>⏳ Pendiente</option>
+                                        <option value="aprobado" {% if sol.estado|lower == 'aprobado' %}selected{% endif %}>✅ Aprobado</option>
+                                        <option value="programado" {% if sol.estado|lower == 'programado' %}selected{% endif %}>📅 Programado</option>
+                                        <option value="cancelado" {% if sol.estado|lower == 'cancelado' %}selected{% endif %}>🚫 Cancelado</option>
+                                        <option value="rechazado" {% if sol.estado|lower == 'rechazado' %}selected{% endif %}>❌ Rechazado</option>
                                     </select>
                                     <button type="submit" class="primary" style="padding: 4px 12px; margin-bottom: 0; font-size: 0.85rem; background-color: #0056b3; border-color: #0056b3;">
                                         Guardar
@@ -94,7 +108,7 @@
                                     👥
                                 </a>
 
-                                {% if sol.estado in ['aprobado', 'programado'] %}
+                                {% if sol.estado|lower in ['aprobado', 'programado'] %}
                                     <a href="/evento/difundir/{{ sol.id }}" class="button" 
                                        style="padding: 4px 10px; font-size: 0.85rem; background-color: #17a2b8; border-color: #17a2b8; color: white; margin-bottom: 0;"
                                        title="Generar Ficha de Difusión">
@@ -103,13 +117,14 @@
                                 {% endif %}
 
                                 <a href="/admin/editar-evento/{{ sol.id }}" class="button" 
-                                   style="padding: 4px 10px; font-size: 0.85rem; background-color: #ffc107; border-color: #ffc107; color: #000; margin-bottom: 0;">
+                                   style="padding: 4px 10px; font-size: 0.85rem; background-color: #ffc107; border-color: #ffc107; color: #000; margin-bottom: 0;"
+                                   title="Editar Evento">
                                     ✏️
                                 </a>
                                 
                                 <form action="/admin/eliminar-evento/{{ sol.id }}" method="POST" style="margin: 0;" 
                                       onsubmit="return confirm('¿Está completamente seguro de eliminar este evento de forma permanente? Esta acción no se puede deshacer.');">
-                                    <button type="submit" style="padding: 4px 10px; font-size: 0.85rem; background-color: #dc3545; border-color: #dc3545; color: white; margin-bottom: 0;">
+                                    <button type="submit" style="padding: 4px 10px; font-size: 0.85rem; background-color: #dc3545; border-color: #dc3545; color: white; margin-bottom: 0;" title="Eliminar Evento">
                                         🗑️
                                     </button>
                                 </form>
@@ -136,29 +151,48 @@
     <div class="table-container">
         <table>
             <thead>
-                <tr>
-                    <th>Título Sugerido de la Idea</th>
-                    <th>Tipo de Actividad</th>
-                    <th>Justificación / Descripción Técnica</th>
-                    <th>Propuesto por (Estudiante)</th>
-                </tr>
+            <tr>
+                <th>TÍTULO SUGERIDO</th>
+                <th>TIPO</th>
+                <th>JUSTIFICACIÓN / DESCRIPCIÓN</th>
+                <th>PROPUESTO POR</th>
+                <th>ESTADO</th>
+                <th>ACCIONES</th>
+            </tr>
             </thead>
             <tbody>
-                {% if propuestas %}
-                    {% for prop in propuestas %}
-                    <tr>
-                        <td><strong>{{ prop.titulo }}</strong></td>
-                        <td><mark style="background-color: #e2e8f0; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">{{ prop.tipo_actividad }}</mark></td>
-                        <td>{{ prop.descripcion }}</td>
-                        <td>👤 {{ prop.estudiante }}</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: #888;">No hay nuevas propuestas estudiantiles pendientes de evaluación.</td>
-                    </tr>
-                {% endif %}
-            </tbody>            
+                {% for prop in propuestas %}
+                <tr>
+                    <td class="fw-bold">{{ prop.titulo }}</td>
+                    <td><span class="badge bg-light text-dark border">{{ prop.tipo_actividad }}</span></td>
+                    <td>{{ prop.descripcion }}</td>
+                    <td><small>👤 {{ prop.estudiante }}</small></td>
+                    <td>
+                        {% if prop.estado == 'aceptado' %}
+                            <span class="badge bg-success">Aceptado</span>
+                        {% elif prop.estado == 'rechazado' %}
+                            <span class="badge bg-danger">Rechazado</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if prop.estado == 'pendiente' %}
+                            <a href="{{ url_for('aprobar_propuesta', propuesta_id=prop.id) }}" class="btn btn-sm btn-success" title="Aprobar y Agendar">
+                                ✅ Aprobar
+                            </a>
+                            <form action="{{ url_for('rechazar_propuesta', propuesta_id=prop.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Desea rechazar esta propuesta?')" title="Rechazar">
+                                    ❌
+                                </button>
+                            </form>
+                        {% else %}
+                            <small class="text-muted">Procesado</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>           
         </table>
     </div>
 </section>

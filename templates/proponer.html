@@ -1,39 +1,65 @@
 {% extends 'base.html' %}
 
-{% block title %}Proponer Evento - FaCyT{% endblock %}
+{% block title %}Proponer Actividad - SGJC FaCyT{% endblock %}
 
 {% block content %}
-<article style="max-width: 650px; margin: 0 auto;">
-    <h2>Proponer Iniciativa o Evento 💡</h2>
-    <p style="color: var(--text-muted);">Envía tu propuesta de actividad académica, taller o charla para ser evaluada por la coordinación.</p>
+<main style="display: flex; justify-content: center; align-items: center; min-height: 75vh; padding: 20px;">
+    <article style="max-width: 560px; width: 100%; padding: 32px; border-radius: 12px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);">
+        
+        <!-- Encabezado -->
+        <header style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">💡</div>
+            <h3 style="margin-bottom: 8px; font-weight: 800; color: #0f172a; font-size: 1.35rem;">Proponer Nueva Actividad</h3>
+            <p style="color: #64748b; font-size: 0.88rem; margin: 0; font-weight: 500; line-height: 1.4;">
+                Envía tus ideas de eventos o talleres. Serán evaluadas por el comité académico/administrativo.
+            </p>
+        </header>
 
-    <form action="{{ url_for('proponer') }}" method="POST">
-        <div style="margin-bottom: 15px;">
-            <label for="titulo">Título de la Idea / Propuesta:</label>
-            <input type="text" id="titulo" name="titulo" required placeholder="Ej. Taller de Introducción a Python">
-        </div>
+        <!-- Formulario -->
+        <form action="{{ url_for('proponer') }}" method="POST">
+            
+            <div style="margin-bottom: 16px;">
+                <label for="titulo" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">
+                    Título de la Propuesta / Idea:
+                </label>
+                <input type="text" id="titulo" name="titulo" placeholder="Ej. Taller Interactivo de Python y Ciencia de Datos" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem;">
+            </div>
 
-        <div style="margin-bottom: 15px;">
-            <label for="tipo_actividad">Tipo de Actividad:</label>
-            <select id="tipo_actividad" name="tipo_actividad" required>
-                <option value="" disabled selected>Seleccione una opción</option>
-                <option value="Conferencia">Conferencia</option>
-                <option value="Taller">Taller / Workshop</option>
-                <option value="Seminario">Seminario</option>
-                <option value="Charla Informativa">Charla Informativa</option>
-                <option value="Otro">Otro</option>
-            </select>
-        </div>
+            <div style="margin-bottom: 16px;">
+                <label for="tipo_actividad" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">
+                    Tipo de Actividad:
+                </label>
+                <select id="tipo_actividad" name="tipo_actividad" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem; background-color: #ffffff; color: #334155; cursor: pointer;">
+                    <option value="" disabled selected>Selecciona una opción...</option>
+                    <option value="Conferencia">Conferencia / Ponencia</option>
+                    <option value="Taller">Taller Práctico / Workshop</option>
+                    <option value="Seminario">Seminario o Conversatorio</option>
+                    <option value="Jornada Cientifica">Jornada Científica</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
 
-        <div style="margin-bottom: 20px;">
-            <label for="descripcion">Descripción / Justificación Técnica:</label>
-            <textarea id="descripcion" name="descripcion" rows="5" required placeholder="Explica de qué trata la actividad y a quién va dirigida..."></textarea>
-        </div>
+            <div style="margin-bottom: 24px;">
+                <label for="descripcion" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">
+                    Descripción Detallada:
+                </label>
+                <textarea id="descripcion" name="descripcion" rows="4" placeholder="Explica de qué trata la actividad, objetivos y a quién va dirigida..." required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem; font-family: inherit; resize: vertical;"></textarea>
+            </div>
 
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <a href="{{ url_for('inicio') }}" class="button secondary outline" style="margin: 0;">Cancelar</a>
-            <button type="submit" class="primary" style="margin: 0;">Enviar Propuesta</button>
-        </div>
-    </form>
-</article>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; border-radius: 6px;">
+                <i class="fa-solid fa-paper-plane"></i> Enviar Propuesta
+            </button>
+        </form>
+
+        <hr style="margin: 24px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+        <!-- Enlace a Mis Propuestas -->
+        <footer style="text-align: center; font-size: 0.88rem; background: transparent; border-top: none; padding: 0;">
+            <a href="{{ url_for('mis_propuestas') }}" style="color: #1d4ed8; font-weight: 700; text-decoration: none;">
+                📋 Ver mis propuestas enviadas
+            </a>
+        </footer>
+
+    </article>
+</main>
 {% endblock %}

@@ -1,42 +1,86 @@
 {% extends 'base.html' %}
 
-{% block title %}Mis Propuestas - FaCyT{% endblock %}
+{% block title %}Mis Propuestas - SGJC FaCyT{% endblock %}
 
 {% block content %}
-<h2>Mis Ideas y Propuestas Enviadas 💡</h2>
-<p>Historial de iniciativas de congresos o talleres que has sugerido al cuerpo docente de la facultad.</p>
+<div style="max-width: 900px; margin: 0 auto; padding: 20px 0;">
+    
+    <!-- Encabezado de Sección -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
+        <div>
+            <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-lightbulb" style="color: #1d4ed8;"></i> Mis Propuestas de Actividades
+            </h2>
+            <p style="color: #64748b; font-size: 0.88rem; margin: 4px 0 0 0; font-weight: 500;">
+                Historial y estado de las ideas enviadas a la administración.
+            </p>
+        </div>
 
-<article>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Idea / Título de Actividad</th>
-                    <th>Tipo</th>
-                    <th>Descripción Enviada</th>
-                    <th>Fecha de Envío</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if mis_propuestas %}
-                    {% for prop in mis_propuestas %}
-                    <tr>
-                        <td><strong>{{ prop.titulo }}</strong></td>
-                        <td><span class="badge" style="background:#2f855a; color:white; padding:2px 6px; border-radius:4px;">{{ prop.tipo_actividad }}</span></td>
-                        <td>{{ prop.descripcion }}</td>
-                        <td>{{ prop.fecha_propuesta_evento }}</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: #888;">Aún no has enviado ninguna propuesta de evento.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+        <a href="{{ url_for('proponer') }}" class="btn btn-primary" style="padding: 10px 18px; font-size: 0.88rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-plus"></i> Nueva Propuesta
+        </a>
     </div>
-    <footer style="background: transparent; border-top: none; padding-top: 15px;">
-        <a href="/" class="button secondary">Volver al Inicio</a>
-    </footer>
-</article>
+
+    <!-- Lista de Propuestas -->
+    {% if mis_propuestas %}
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            {% for p in mis_propuestas %}
+                {% set est = p.estado|lower if p.estado is defined else 'en revision' %}
+                
+                <article style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
+                        
+                        <h4 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">
+                            {{ p.titulo }}
+                        </h4>
+
+                        <!-- Badges de Estado -->
+                        {% if est == 'aprobado' or est == 'aprobada' %}
+                            <span style="background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; text-transform: uppercase;">
+                                <i class="fa-solid fa-circle-check"></i> Aprobada
+                            </span>
+                        {% elif est == 'rechazado' or est == 'rechazada' %}
+                            <span style="background: #fee2e2; color: #991b1b; font-weight: 800; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; text-transform: uppercase;">
+                                <i class="fa-solid fa-circle-xmark"></i> Rechazada
+                            </span>
+                        {% else %}
+                            <span style="background: #fef3c7; color: #b45309; font-weight: 800; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; text-transform: uppercase;">
+                                <i class="fa-solid fa-hourglass-half"></i> En Revisión
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div style="font-size: 0.82rem; color: #0369a1; font-weight: 700; margin-bottom: 10px; text-transform: uppercase;">
+                        <i class="fa-solid fa-tag"></i> {{ p.tipo_actividad or 'General' }}
+                    </div>
+
+                    <p style="font-size: 0.92rem; color: #334155; line-height: 1.5; margin: 0 0 16px 0;">
+                        {{ p.descripcion }}
+                    </p>
+
+                    <!-- BOTÓN EDITAR: VISIBLE SOLO SI EL ESTADO ES EN REVISIÓN / PENDIENTE -->
+                    {% if est in ['en revision', 'en revisión', 'pendiente'] %}
+                        <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: flex-end;">
+                            <a href="{{ url_for('editar_propuesta', propuesta_id=p.id) }}" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.82rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 6px;">
+                                <i class="fa-solid fa-pen" style="color: #2563eb;"></i> Editar Propuesta
+                            </a>
+                        </div>
+                    {% endif %}
+
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Sin propuestas -->
+        <div style="background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 40px; text-align: center; color: #64748b;">
+            <i class="fa-solid fa-folder-open" style="font-size: 2.5rem; color: #94a3b8; margin-bottom: 12px; display: block;"></i>
+            <h4 style="margin: 0 0 6px 0; color: #334155; font-weight: 700;">Aún no has registrado ninguna propuesta</h4>
+            <p style="margin: 0 0 20px 0; font-size: 0.9rem;">Si tienes una idea para una jornada o taller, compártela con nosotros.</p>
+            <a href="{{ url_for('proponer') }}" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-lightbulb"></i> Crear Primera Propuesta
+            </a>
+        </div>
+    {% endif %}
+
+</div>
 {% endblock %}

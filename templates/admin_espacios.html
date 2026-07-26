@@ -3,72 +3,96 @@
 {% block title %}Gestión de Espacios - SGJC-FaCyT{% endblock %}
 
 {% block content %}
-<h2>🏢 Gestión de Espacios Físicos</h2>
-<p>Administra los salones, laboratorios y auditorios disponibles en la facultad.</p>
+<div class="content-card">
+    <div style="margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
+        <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; display: flex; align-items: center; gap: 10px; text-transform: none; letter-spacing: -0.3px;">
+            <i class="fa-solid fa-building" style="color: #1d4ed8; font-size: 1.5rem;"></i> Gestión de Espacios Físicos
+        </h2>
+        <p style="font-size: 0.9rem; color: #475569; font-weight: 600; margin: 0; line-height: 1.4;">
+            Administra los salones, laboratorios y auditorios disponibles en la facultad.
+        </p>
+    </div>
 
-<details style="margin-bottom: 30px;">
-    <summary role="button" class="secondary">➕ Registrar Nuevo Espacio</summary>
-    <article style="margin-top: 10px; background-color: #f8f9fa; border: 1px solid var(--border-color);">
-        <form action="/admin/espacios/nuevo" method="POST" style="margin-bottom: 0;">
-            <div class="grid">
-                <label>
-                    Nombre del Espacio:
-                    <input type="text" name="nombre" placeholder="Ej. Auditorio FaCyT" required>
-                </label>
-                <label>
-                    Capacidad (Personas):
-                    <input type="number" name="capacidad" placeholder="Ej. 120" required>
-                </label>
-            </div>
-            <label>
-                Descripción o Recursos (Opcional):
-                <input type="text" name="descripcion" placeholder="Ej. Proyector, Pizarra acrílica, Aire acondicionado">
-            </label>
-            <button type="submit" style="background-color: #0056b3; border-color: #0056b3; width: auto;">Guardar Espacio</button>
-        </form>
-    </article>
-</details>
+    <!-- FORMULARIO DE REGISTRO NUEVO ESPACIO -->
+    <details style="margin-bottom: 30px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; padding: 12px 16px;">
+        <summary style="font-weight: 800; color: #0f172a; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-square-plus" style="color: #1d4ed8;"></i> Registrar Nuevo Espacio
+        </summary>
+        
+        <div style="margin-top: 16px; border-top: 1px solid #cbd5e1; padding-top: 16px;">
+            <form action="/admin/espacios/nuevo" method="POST" style="margin-bottom: 0;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 12px;">
+                    <div>
+                        <label>Nombre del Espacio:</label>
+                        <input type="text" name="nombre" placeholder="Ej. Auditorio FaCyT" required>
+                    </div>
+                    <div>
+                        <label>Capacidad (Personas):</label>
+                        <input type="number" name="capacidad" placeholder="Ej. 120" required>
+                    </div>
+                </div>
 
-<hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 30px;">
+                <div style="margin-bottom: 16px;">
+                    <label>Descripción o Recursos (Opcional):</label>
+                    <input type="text" name="descripcion" placeholder="Ej. Proyector, Pizarra acrílica, Aire acondicionado">
+                </div>
 
-<h3>Lista de Espacios Registrados</h3>
-<div class="table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>Nombre y Descripción</th>
-                <th>Capacidad</th>
-                <th>Estado</th>
-                <th style="text-align: center;">Acción</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if espacios %}
-                {% for espacio in espacios %}
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Espacio
+                </button>
+            </form>
+        </div>
+    </details>
+
+    <!-- TABLA DE ESPACIOS REGISTRADOS -->
+    <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-top: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-list-check" style="color: #1d4ed8;"></i> Lista de Espacios Registrados
+    </h3>
+
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
                 <tr>
-                    <td>
-                        <strong>{{ espacio.nombre }}</strong><br>
-                        <small style="color: #666;">{{ espacio.descripcion }}</small>
-                    </td>
-                    <td>{{ espacio.capacidad }} personas</td>
-                    <td>
-                        <mark style="background-color: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">Activo</mark>
-                    </td>
-                    <td style="text-align: center;">
-                        <form action="/admin/espacios/eliminar/{{ espacio.id }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Seguro que deseas eliminar este espacio?');">
-                            <button type="submit" style="padding: 4px 10px; font-size: 0.85rem; background-color: #dc3545; border-color: #dc3545; color: white; margin-bottom: 0;" title="Eliminar Espacio">
-                                🗑️
-                            </button>
-                        </form>
-                    </td>
+                    <th>Nombre y Descripción</th>
+                    <th>Capacidad</th>
+                    <th>Estado</th>
+                    <th style="text-align: center;">Acción</th>
                 </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="4" style="text-align: center; color: #888;">No hay espacios físicos registrados en el sistema todavía.</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% if espacios %}
+                    {% for espacio in espacios %}
+                    <tr>
+                        <td>
+                            <strong style="color: #0f172a; font-size: 0.95rem;">{{ espacio.nombre }}</strong>
+                            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">
+                                {{ espacio.descripcion if espacio.descripcion else 'Sin descripción disponible' }}
+                            </div>
+                        </td>
+                        <td>
+                            <strong style="color: #0f172a;">{{ espacio.capacidad }}</strong> personas
+                        </td>
+                        <td>
+                            <span class="badge badge-approved">Activo</span>
+                        </td>
+                        <td style="text-align: center;">
+                            <form action="/admin/espacios/eliminar/{{ espacio.id }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Seguro que deseas eliminar este espacio?');">
+                                <button type="submit" class="btn btn-danger" title="Eliminar Espacio">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #64748b; font-weight: 600; padding: 24px;">
+                            No hay espacios físicos registrados en el sistema todavía.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

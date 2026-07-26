@@ -5,7 +5,7 @@ from database import obtener_conexion
 def registrar_inscripcion_segura(evento_id, usuario_id):
     """
     Registra a un usuario manejando bloqueo concurrente (FOR UPDATE)
-    y control transaccional estricto.
+    y control transaccional estricto. Bloquea inscripciones si el evento está cancelado.
     """
     conexion = obtener_conexion()
     
@@ -13,9 +13,9 @@ def registrar_inscripcion_segura(evento_id, usuario_id):
         conexion.begin()
         
         with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
-            # 1. Bloqueo pesimista sobre el evento
+            # 1. Bloqueo pesimista sobre el evento (incluye e.estado)
             cursor.execute("""
-                SELECT e.id, esp.capacidad 
+                SELECT e.id, e.estado, esp.capacidad 
                 FROM eventos e
                 INNER JOIN espacios esp ON e.espacio_id = esp.id
                 WHERE e.id = %s FOR UPDATE;
@@ -25,6 +25,15 @@ def registrar_inscripcion_segura(evento_id, usuario_id):
             if not evento:
                 conexion.rollback()
                 return {"status": "error", "message": "El evento seleccionado no existe."}
+            
+            # 1.5. VALIDACIÓN DE ESTADO: Bloqueo de seguridad para eventos cancelados
+            estado_actual = str(evento.get('estado', '')).strip().lower()
+            if estado_actual == 'cancelado':
+                conexion.rollback()
+                return {
+                    "status": "warning", 
+                    "message": "🚫 No es posible inscribirse a este evento porque ha sido cancelado por la administración."
+                }
                 
             # 2. Contar inscritos activos en el momento
             cursor.execute("SELECT COUNT(*) as actuales FROM inscripciones WHERE evento_id = %s;", (evento_id,))

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Propuesta - SGJC FaCyT{% endblock %}
+
+{% block content %}
+<main style="display: flex; justify-content: center; align-items: center; min-height: 75vh; padding: 20px;">
+    <article style="max-width: 560px; width: 100%; padding: 32px; border-radius: 12px; border: 1px solid #cbd5e1; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);">
+        
+        <!-- Encabezado -->
+        <header style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">✏️</div>
+            <h3 style="margin-bottom: 8px; font-weight: 800; color: #0f172a; font-size: 1.35rem;">Editar Propuesta</h3>
+            <p style="color: #64748b; font-size: 0.88rem; margin: 0; font-weight: 500;">
+                Modifica los datos de tu propuesta mientras siga en evaluación.
+            </p>
+        </header>
+
+        <!-- Formulario -->
+        <form action="{{ url_for('editar_propuesta', propuesta_id=propuesta.id or propuesta._id) }}" method="POST">
+            
+            <div style="margin-bottom: 16px;">
+                <label for="titulo" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">
+                    Título de la Propuesta:
+                </label>
+                <input type="text" id="titulo" name="titulo" value="{{ propuesta.titulo }}" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem;">
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label for="departamento" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">
+                    Departamento / Área:
+                </label>
+                <select id="departamento" name="departamento" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem; background-color: #ffffff; color: #334155; cursor: pointer;">
+                    <option value="Computación" {% if propuesta.departamento == 'Computación' %}selected{% endif %}>Computación</option>
+                    <option value="Química" {% if propuesta.departamento == 'Química' %}selected{% endif %}>Química</option>
+                    <option value="Matemática" {% if propuesta.departamento == 'Matemática' %}selected{% endif %}>Matemática</option>
+                    <option value="Física" {% if propuesta.departamento == 'Física' %}selected{% endif %}>Física</option>
+                    <option value="Biología" {% if propuesta.departamento == 'Biología' %}selected{% endif %}>Biología</option>
+                    <option value="General" {% if propuesta.departamento == 'General' or not propuesta.departamento %}selected{% endif %}>General / Multidisciplinario</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label for="tipo_actividad" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">
+                    Tipo de Actividad:
+                </label>
+                <select id="tipo_actividad" name="tipo_actividad" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem; background-color: #ffffff; color: #334155; cursor: pointer;">
+                    <option value="Conferencia" {% if propuesta.tipo_actividad == 'Conferencia' %}selected{% endif %}>Conferencia / Ponencia</option>
+                    <option value="Taller" {% if propuesta.tipo_actividad == 'Taller' %}selected{% endif %}>Taller Práctico / Workshop</option>
+                    <option value="Seminario" {% if propuesta.tipo_actividad == 'Seminario' %}selected{% endif %}>Seminario o Conversatorio</option>
+                    <option value="Jornada Cientifica" {% if propuesta.tipo_actividad == 'Jornada Cientifica' %}selected{% endif %}>Jornada Científica</option>
+                    <option value="Otro" {% if propuesta.tipo_actividad == 'Otro' %}selected{% endif %}>Otro</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <label for="descripcion" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px; text-transform: uppercase;">
+                    Descripción Detallada:
+                </label>
+                <textarea id="descripcion" name="descripcion" rows="4" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem; font-family: inherit; resize: vertical;">{{ propuesta.descripcion }}</textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <a href="{{ url_for('mis_propuestas') }}" class="btn btn-secondary" style="flex: 1; text-align: center; padding: 12px; font-weight: 700; font-size: 0.9rem; text-decoration: none; background: #e2e8f0; color: #334155; border-radius: 6px;">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary" style="flex: 2; padding: 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border-radius: 6px; background: #2563eb; color: #ffffff;">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+
+    </article>
+</main>
+{% endblock %}

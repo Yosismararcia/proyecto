@@ -2,516 +2,524 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SGJC - FaCyT UC{% endblock %}</title>
-   
-    <!-- Pico.css Base -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-    <!-- FontAwesome para Íconos -->
+
+    <!-- Iconos de interfaz -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Inter) -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 
     <style>
-        :root {
-            --primary: #0056b3;
-            --primary-gradient: linear-gradient(135deg, #0056b3, #003366);
-            --primary-hover: #003f88;
-            --accent: #0284c7;
-            --accent-glow: rgba(2, 132, 199, 0.15);
-            --bg-main: #f1f5f9;
-            --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #cbd5e1;
-            --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
-            --radius: 12px;
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box !important;
-        }
-
-        html, body {
-            background-color: var(--bg-main) !important;
-            color: var(--text-main) !important;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            max-width: 100vw !important;
-            overflow-x: hidden !important;
+        /* === RESET Y PALETA DE ALTO CONTRASTE === */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        
+        body { 
+            background-color: #cbd5e1;
+            color: #0f172a; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
             font-size: 15px;
             line-height: 1.5;
         }
+        
+        a { text-decoration: none; color: inherit; }
 
-        [data-theme="dark"], article, section, div, main, .card, header, footer {
-            background-color: transparent;
-            color: inherit;
-        }
-
-        .top-navbar {
-            background: #ffffff !important;
-            border-bottom: 2px solid #e2e8f0 !important;
-            padding: 10px 20px !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .nav-wrapper {
-            max-width: 1400px;
-            margin: 0 auto;
+        /* === HEADER ÚNICO Y PERMANENTE === */
+        header.main-header {
+            background-color: #0f172a;
+            color: #ffffff;
+            border-bottom: 4px solid #1d4ed8;
+            padding: 0 24px;
+            height: 64px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .brand-container {
+        .brand-logo {
             display: flex;
             align-items: center;
             gap: 12px;
-            text-decoration: none;
-        }
-
-        .brand-logos {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logo-placeholder {
-            width: 40px;
-            height: 40px;
-            background: var(--primary-gradient);
-            color: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-weight: 800;
-            font-size: 1.1rem;
-            box-shadow: 0 2px 6px rgba(0,86,179,0.3);
+            font-size: 1.15rem;
+            color: #ffffff;
         }
 
-        .brand-text h1 {
-            font-size: 1.15rem !important;
-            font-weight: 800 !important;
-            color: #0f172a !important;
-            margin: 0 !important;
-            line-height: 1.1;
-        }
-
-        .brand-text span {
-            font-size: 0.75rem !important;
-            color: var(--text-muted) !important;
-            font-weight: 600;
-            display: block;
-        }
-
-        .nav-menu {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            flex-wrap: wrap;
-        }
-
-        .nav-link-custom {
-            color: #334155 !important;
-            font-weight: 600 !important;
-            font-size: 0.88rem !important;
-            padding: 8px 12px !important;
+        .brand-logo i {
+            background: #1d4ed8;
+            color: #ffffff;
+            padding: 8px;
             border-radius: 8px;
-            text-decoration: none !important;
+            font-size: 1rem;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 10px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-link {
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            background: #1e293b;
+            border: 1px solid #334155;
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: all 0.2s ease;
-            background: transparent;
+            transition: all 0.2s;
         }
 
-        .nav-link-custom i {
-            color: var(--primary);
+        .nav-link:hover {
+            background: #1d4ed8;
+            color: #ffffff;
         }
 
-        .nav-link-custom:hover {
-            background-color: #f1f5f9 !important;
-            color: var(--primary) !important;
+        .nav-link-logout {
+            background: #991b1b;
+            color: #ffffff;
+            border-color: #7f1d1d;
         }
 
-        .btn-logout {
-            background-color: #fef2f2 !important;
-            color: #dc2626 !important;
-            border: 1px solid #fecaca !important;
-            padding: 6px 12px !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            font-size: 0.85rem !important;
+        .nav-link-logout:hover {
+            background: #dc2626;
         }
 
-        .btn-logout:hover {
-            background-color: #dc2626 !important;
-            color: #ffffff !important;
-        }
-
-        .app-layout {
-            display: grid !important;
-            grid-template-columns: 280px 1fr !important;
-            gap: 20px !important;
-            align-items: start !important;
-            max-width: 1400px;
-            margin: 20px auto;
+        /* === ESTRUCTURA PRINCIPAL === */
+        /* === ESTRUCTURA PRINCIPAL === */
+        main.main-wrapper {
+            max-width: 1300px;
+            width: 100%;
+            margin: 24px auto;
             padding: 0 16px;
+            flex: 1;
+            display: grid;
+            gap: 24px;
+            /* Por defecto: 1 columna centrada (sin sesión) */
+            grid-template-columns: 1fr; 
         }
 
-        .sidebar {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 16px !important;
-            width: 100% !important;
+        /* Si el usuario tiene sesión activa: 2 columnas */
+        main.main-wrapper.con-sidebar {
+            grid-template-columns: 1fr 310px;
         }
 
-        .main-content {
-            width: 100% !important;
-            min-width: 0;
+        /* Estilo para cuando no hay sesión */
+        .unauth-container {
+            max-width: 520px;
+            margin: 40px auto;
+            width: 100%;
         }
 
-        article, .card, .card-custom, main article {
-            background-color: var(--bg-card) !important;
-            color: var(--text-main) !important;
-            border: 1px solid var(--border-color) !important;
-            border-radius: var(--radius) !important;
-            box-shadow: var(--shadow-soft) !important;
-            padding: 20px !important;
-            margin-bottom: 20px !important;
+        /* === TARJETAS DEL CONTENIDO CENTRAL === */
+        .card {
+            background: #ffffff;
+            border: 1px solid #94a3b8;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
         }
 
-        .card-custom header {
-            font-weight: 700;
-            margin-bottom: 12px;
-            font-size: 0.95rem;
-            color: #0f172a !important;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 8px;
-            background: transparent;
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #0f172a;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+            border-bottom: 2px solid #e2e8f0;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .card-custom header i {
-            color: var(--primary);
+        /* === CUADRÍCULA DE ESTADÍSTICAS HORIZONTAL === */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
         }
 
-        h1, h2, h3, h4, h5, h6, strong {
-            color: #0f172a !important;
-            font-weight: 700 !important;
-        }
-
-        p, label, span {
-            color: var(--text-main);
-        }
-
-        .clock-box {
-            font-size: 1.8rem !important;
-            font-weight: 800 !important;
-            color: var(--primary) !important;
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 16px;
             text-align: center;
-            letter-spacing: 1px;
-            margin: 4px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .date-box {
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .calendar-status {
-            display: block;
-            margin-top: 10px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-align: center;
-            padding: 6px;
-            border-radius: 6px;
-            background-color: #f8fafc;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
+        .stat-card-title {
+            font-size: 0.78rem;
+            font-weight: 800;
             text-transform: uppercase;
-        }
-
-        .badge-completado {
-            background-color: #e0f2fe;
-            color: #0369a1;
-            border: 1px solid #bae6fd;
-        }
-
-        label {
-            font-weight: 600 !important;
-            font-size: 0.9rem !important;
-            color: #334155 !important;
-            margin-bottom: 6px !important;
+            color: #64748b;
+            margin-bottom: 6px;
             display: block;
         }
 
-        input, select, textarea {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-            border: 1.5px solid #cbd5e1 !important;
-            border-radius: 8px !important;
-            padding: 10px 14px !important;
-            font-size: 0.95rem !important;
-            width: 100% !important;
+        .stat-card-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #1d4ed8;
         }
 
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--primary) !important;
-            box-shadow: 0 0 0 3px var(--accent-glow) !important;
-            outline: none !important;
-        }
-
-        button, .button, input[type="submit"] {
-            background: var(--primary-gradient) !important;
-            color: #ffffff !important;
-            border: none !important;
-            border-radius: 8px !important;
-            padding: 10px 20px !important;
-            font-weight: 600 !important;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 51, 102, 0.2);
-            transition: all 0.2s ease;
-        }
-
-        button:hover, .button:hover, input[type="submit"]:hover {
-            background-color: var(--primary-hover) !important;
-            transform: translateY(-1px);
-        }
-
+        /* === TABLAS CON ESPACIO Y FORMATO REAL === */
         .table-container {
             width: 100%;
             overflow-x: auto;
-            border-radius: var(--radius);
-            border: 1px solid var(--border-color);
+            border: 1px solid #94a3b8;
+            border-radius: 10px;
+            background: #ffffff;
+            margin-top: 10px;
         }
 
         table {
-            width: 100% !important;
-            border-collapse: collapse !important;
-            background-color: #ffffff !important;
-            margin: 0 !important;
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
         }
 
-        table th {
-            background-color: #f8fafc !important;
-            color: #334155 !important;
-            font-weight: 700 !important;
-            border-bottom: 2px solid var(--border-color) !important;
-            padding: 12px 16px !important;
-            text-align: left !important;
+        th {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 14px 18px;
+            border-bottom: 2px solid #334155;
+            white-space: nowrap;
         }
 
-        table td {
-            padding: 12px 16px !important;
-            border-bottom: 1px solid #f1f5f9 !important;
-            color: var(--text-main) !important;
-        }
-
-        .msg-flash {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        td {
+            padding: 14px 18px;
+            font-size: 0.88rem;
             font-weight: 600;
+            color: #1e293b;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+            line-height: 1.5;
+        }
+
+        tr:nth-child(even) td { background-color: #f8fafc; }
+        tr:hover td { background-color: #f1f5f9; }
+
+        /* === FORMULARIOS E INPUTS MEJORADOS === */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"], 
+        input[type="email"], 
+        input[type="password"], 
+        input[type="date"], 
+        input[type="time"],
+        input[type="url"], 
+        select, 
+        textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #94a3b8;
+            border-radius: 8px;
             font-size: 0.9rem;
+            background-color: #ffffff;
+            color: #0f172a;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #1d4ed8;
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+        }
+
+        /* === BOTONES === */
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .btn-primary { background: #1d4ed8; color: #ffffff; }
+        .btn-primary:hover { background: #1e40af; }
+
+        .btn-dark { background: #0f172a; color: #ffffff; }
+        .btn-dark:hover { background: #1e293b; }
+
+        .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .btn-disabled { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; cursor: default; }
+
+        .btn-block { width: 100%; }
+
+        /* === BADGES === */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .badge-role { background: #1d4ed8; color: #ffffff; }
+        .badge-approved { background: #166534; color: #ffffff; }
+        .badge-pending { background: #b45309; color: #ffffff; }
+
+        /* === SIDEBAR (SOLO AUTENTICADO) === */
+        .sidebar-card {
+            background: #ffffff;
+            border: 1px solid #94a3b8;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .sidebar-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .msg-error, .msg-danger { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-        .msg-success { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
 
-        @media (max-width: 992px) {
-            .app-layout {
-                grid-template-columns: 1fr !important;
-                padding: 0 10px;
-            }
+        /* === FOOTER ÚNICO === */
+        footer.main-footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            border-top: 3px solid #1d4ed8;
+            padding: 16px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: auto;
+        }
 
-            .nav-wrapper {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        footer.main-footer strong { color: #ffffff; }
 
-            .nav-menu {
-                width: 100%;
-                justify-content: space-between;
-                overflow-x: auto;
-                padding-bottom: 4px;
-            }
+        /* === ESTILOS GLOBALES DE FORMULARIOS === */
+        label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 12px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
 
-            .nav-link-custom {
-                font-size: 0.8rem !important;
-                padding: 6px 10px !important;
-            }
+        input[type="text"], 
+        input[type="number"], 
+        input[type="date"], 
+        input[type="time"], 
+        select, 
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #64748b;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #0f172a;
+            background-color: #ffffff;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #1d4ed8;
+            outline: 2px solid #1d4ed8;
+        }
+
+        /* === ESTILOS GLOBALES DE BOTONES === */
+        .btn {
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn-primary { background: #1d4ed8; color: #ffffff; }
+        .btn-primary:hover { background: #1e40af; }
+
+        .btn-success { background: #15803d; color: #ffffff; }
+        .btn-success:hover { background: #166534; }
+
+        .btn-danger { background: #b91c1c; color: #ffffff; padding: 6px 12px; }
+        .btn-danger:hover { background: #991b1b; }
+
+        .btn-secondary { background: #475569; color: #ffffff; }
+        .btn-secondary:hover { background: #334155; }
+
+        .btn-telegram { background: #0088cc; color: #ffffff; }
+        .btn-email { background: #dc2626; color: #ffffff; }
+
+        h2 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
     </style>
 </head>
 <body>
 
-    <header class="top-navbar">
-        <div class="nav-wrapper">
-            <a href="/" class="brand-container">
-                <div class="brand-logos">
-                    <div class="logo-placeholder"><i class="fa-solid fa-atom"></i></div>
-                </div>
-                <div class="brand-text">
-                    <h1>SGJC - FaCyT</h1>
-                    <span>Gestión de Jornadas Científicas y Eventos Académicos</span>
-                </div>
-            </a>
+    <!-- HEADER ÚNICO -->
+    <header class="main-header">
+        <a href="/" class="brand-logo">
+            <i class="fa-solid fa-atom"></i>
+            <div>SGJC - FaCyT</div>
+        </a>
 
-            <ul class="nav-menu">
-                {% if session.get('usuario_id') %}
-                    <li><a href="{{ url_for('inicio') }}" class="nav-link-custom"><i class="fa-solid fa-chart-pie"></i> Inicio</a></li>
-
-                    {% if session.get('usuario_rol') in ['administrative', 'administrativo'] %}
-                        <li><a href="/admin" class="nav-link-custom"><i class="fa-solid fa-sliders"></i> Admin</a></li>
-                        <li><a href="/admin/espacios" class="nav-link-custom"><i class="fa-solid fa-building"></i> Espacios</a></li>
-                    {% endif %}
-
-                    {% if session.get('usuario_rol') in ['estudiante', 'student'] %}
-                        <li><a href="/proponer" class="nav-link-custom"><i class="fa-solid fa-lightbulb"></i> Proponer</a></li>
-                        <li><a href="/mis_propuestas" class="nav-link-custom"><i class="fa-solid fa-list-check"></i> Propuestas</a></li>
-                    {% endif %}
-
-                    {% if session.get('usuario_rol') not in ['estudiante', 'student'] %}
-                        <li><a href="/solicitar" class="nav-link-custom"><i class="fa-solid fa-calendar-plus"></i> Registrar Evento</a></li>
-                        <li><a href="/mis_solicitudes" class="nav-link-custom"><i class="fa-solid fa-folder-open"></i> Solicitudes</a></li>
-                    {% endif %}
-
-                    <li><a href="/logout" class="btn-logout nav-link-custom"><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
-                {% else %}
-                    <li><a href="/login" class="button" style="padding: 8px 16px;"><i class="fa-solid fa-lock"></i> Iniciar Sesión</a></li>
+        <ul class="nav-items">
+            {% if session.get('usuario_id') %}
+                <li><a href="{{ url_for('inicio') }}" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Inicio</a></li>
+                {% if session.get('usuario_rol') in ['administrative', 'administrativo'] %}
+                    <li><a href="/admin" class="nav-link"><i class="fa-solid fa-sliders"></i> Admin</a></li>
+                    <li><a href="/admin/espacios" class="nav-link"><i class="fa-solid fa-building"></i> Espacios</a></li>
                 {% endif %}
-            </ul>
-        </div>
+                {% if session.get('usuario_rol') not in ['estudiante', 'student'] %}
+                    <li><a href="/solicitar" class="nav-link"><i class="fa-solid fa-calendar-plus"></i> Registrar Evento</a></li>
+                    <li><a href="/mis_solicitudes" class="nav-link"><i class="fa-solid fa-folder-open"></i> Solicitudes</a></li>
+                {% endif %}
+                <li><a href="/logout" class="nav-link nav-link-logout"><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            {% endif %}
+        </ul>
     </header>
 
-    <main class="container-fluid" style="padding: 0; max-width: 100%;">
-        <div style="max-width: 1400px; margin: 15px auto 0 auto; padding: 0 16px;">
+    <!-- CONTENIDO CENTRAL -->
+        <main class="main-wrapper {% if session.get('usuario_id') %}con-sidebar{% endif %}">        <section>
+            <!-- BLOQUE GLOBAL DE AVISOS Y NOTIFICACIONES -->
             {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="msg-flash msg-{{ category }}">
-                            <i class="fa-solid fa-circle-info"></i> {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </div>
-        <div class="{% if session.get('usuario_id') %}app-layout{% else %}container{% endif %}" style="{% if not session.get('usuario_id') %}max-width: 500px; margin: 40px auto; padding: 0 16px;{% endif %}">
+            {% if messages %}
+                <div style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                {% for category, message in messages %}
+                    {% set cat = category|lower %}
+                    
+                    <!-- Alerta de Error / Peligro -->
+                    {% if cat in ['error', 'danger'] %}
+                    <div style="background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 14px 18px; border-radius: 10px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 10px; box-sizing: border-box;">
+                        <i class="fa-solid fa-circle-xmark" style="color: #dc2626; font-size: 1.1rem;"></i>
+                        <span>{{ message }}</span>
+                    </div>
 
-            {% if session.get('usuario_id') %}
-            <aside class="sidebar">
-                <div class="card-custom">
-                    <header><i class="fa-solid fa-id-card"></i> Perfil Activo</header>
-                    <p style="margin-bottom: 2px; font-size: 0.85rem; color: var(--text-muted);">Usuario conectado:</p>
-                    <p style="font-weight: 700; margin-bottom: 10px; color: #0f172a; font-size: 0.95rem;">{{ session.get('usuario_nombre', 'Usuario') }}</p>
-                    <p style="margin-bottom: 4px; font-size: 0.85rem; color: var(--text-muted);">Rol de acceso:</p>
-                    <span class="badge badge-completado">{{ session.get('usuario_rol', 'Invitado') }}</span>
-                </div>
+                    <!-- Alerta de Advertencia -->
+                    {% elif cat == 'warning' %}
+                    <div style="background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 14px 18px; border-radius: 10px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 10px; box-sizing: border-box;">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #d97706; font-size: 1.1rem;"></i>
+                        <span>{{ message }}</span>
+                    </div>
 
-                <div class="card-custom">
-                    <header style="justify-content: center;"><i class="fa-solid fa-clock"></i> Hora del Sistema</header>
-                    <div id="live-clock" class="clock-box">00:00:00</div>
-                    <div id="live-date" class="date-box">--/--/----</div>
+                    <!-- Alerta de Éxito / Confirmación -->
+                    {% else %}
+                    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 14px 18px; border-radius: 10px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 10px; box-sizing: border-box;">
+                        <i class="fa-solid fa-circle-info" style="color: #15803d; font-size: 1.1rem;"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endif %}
+                {% endfor %}
                 </div>
-
-                <div class="card-custom">
-                    <header><i class="fa-solid fa-calendar-check"></i> Eventos por Fecha</header>
-                    <input type="date" id="sidebar-calendar" style="margin-bottom: 0;">
-                    <span id="sidebar-calendar-msg" class="calendar-status"></span>
-                </div>
-            </aside>
             {% endif %}
+            {% endwith %}
 
-            <section class="main-content">
-                {% block content %}{% endblock %}
-            </section>
-        </div>
+            {% block content %}{% endblock %}
+        </section>
+
+        <!-- BARRA LATERAL (RESTAURADA POR COMPLETO) -->
+        {% if session.get('usuario_id') %}
+        <aside>
+            <div class="sidebar-card">
+                <div class="sidebar-title">
+                    <i class="fa-solid fa-user-check" style="color: #1d4ed8;"></i> Perfil Activo
+                </div>
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase;">USUARIO</div>
+                <div style="font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">
+                    {{ session.get('usuario_nombre', 'Usuario') }}
+                </div>
+                <div style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">ROL DE ACCESO</div>
+                <span class="badge badge-role">
+                    <i class="fa-solid fa-shield-halved"></i> {{ session.get('usuario_rol', 'Usuario') }}
+                </span>
+            </div>
+
+            <div class="sidebar-card" style="text-align: center;">
+                <div class="sidebar-title" style="justify-content: center;">
+                    <i class="fa-solid fa-clock" style="color: #1d4ed8;"></i> Hora del Sistema
+                </div>
+                <div id="live-clock" style="font-size: 1.6rem; font-weight: 900; color: #1d4ed8;"></div>
+                <div id="live-date" style="font-size: 0.8rem; font-weight: 700; color: #64748b;"></div>
+            </div>
+        </aside>
+        {% endif %}
     </main>
 
-    <footer style="margin-top: 50px; padding: 20px; text-align: center; color: var(--text-muted); border-top: 1px solid var(--border-color); background: #ffffff;">
-        <small>© 2026 Facultad Experimental de Ciencias y Tecnología (FaCyT - UC)<br>
-        <strong>SGJC</strong> — Sistema para la Gestión de Jornadas Científicas y Eventos Académicos</small>
+    <!-- FOOTER ÚNICO -->
+    <footer class="main-footer">
+        © 2026 Facultad Experimental de Ciencias y Tecnología (FaCyT - UC) | <strong>SGJC — Sistema de Gestión de Eventos</strong>
     </footer>
 
+    {% if session.get('usuario_id') %}
     <script>
         function updateClock() {
+            const clock = document.getElementById('live-clock');
+            const date = document.getElementById('live-date');
+            if (!clock) return;
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const clockElement = document.getElementById('live-clock');
-            if (clockElement) clockElement.textContent = `${hours}:${minutes}:${seconds}`;
-
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const dateElement = document.getElementById('live-date');
-            if (dateElement) dateElement.textContent = `${day}/${month}/${year}`;
+            clock.textContent = now.toTimeString().split(' ')[0];
+            if (date) date.textContent = now.toLocaleDateString('es-ES');
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            setInterval(updateClock, 1000);
-            updateClock();
-
-            const today = new Date().toISOString().split('T')[0];
-            const calendarInput = document.getElementById('sidebar-calendar');
-            const calendarMsg = document.getElementById('sidebar-calendar-msg');
-
-            if (calendarInput) {
-                calendarInput.value = today;
-
-                let diasOcupados = [];
-                fetch('/api/dias-ocupados')
-                    .then(res => res.json())
-                    .then(data => {
-                        diasOcupados = data;
-                        verificarDiaOcupado(calendarInput.value);
-                    })
-                    .catch(err => console.error("Error al obtener días ocupados:", err));
-
-                calendarInput.addEventListener('change', function() {
-                    verificarDiaOcupado(this.value);
-                });
-
-                function verificarDiaOcupado(fechaSeleccionada) {
-                    if (!calendarMsg) return;
-                    if (diasOcupados.includes(fechaSeleccionada)) {
-                        calendarMsg.style.backgroundColor = '#fef2f2';
-                        calendarMsg.style.color = '#dc2626';
-                        calendarMsg.innerHTML = '<i class="fa-solid fa-calendar-xmark"></i> Eventos programados';
-                    } else {
-                        calendarMsg.style.backgroundColor = '#f0fdf4';
-                        calendarMsg.style.color = '#166534';
-                        calendarMsg.innerHTML = '<i class="fa-solid fa-circle-check"></i> Sin eventos en agenda';
-                    }
-                }
-            }
-        });
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
+    {% endif %}
+
 </body>
 </html>

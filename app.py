@@ -8,6 +8,7 @@ from flask import send_file
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # 1. Importación de Repositorios
 import repositories.evento_repository as evento_repo
@@ -17,6 +18,13 @@ from repositories.inscripcion_repository import (
     registrar_inscripcion_segura,
     obtener_inscritos_por_evento  # 👈 Importar aquí
 )
+from repositories.evento_repository import (
+    obtener_propuesta_por_id,
+    aceptar_y_agendar_propuesta,
+    obtener_lista_espacios_formulario,
+    rechazar_propuesta_estudiante,
+    editar_propuesta_estudiante
+    )
 
 # 2. Importación de Módulos Core y Seguridad
 from core.security import (
@@ -28,7 +36,7 @@ from core.security import (
 )
 
 from core.validators import validar_cedula_format, validar_cedula_institucional
-
+from repositories.evento_repository import obtener_evento_difusion  # Ajusta el nombre de la importación
 #importacion de modulos de database por nuevas modificaciones
 from database import (
     obtener_conexion,
@@ -61,7 +69,12 @@ serializer = obtener_serializer(app.secret_key)
 
 # --- RUTA 1: INICIO (DASHBOARD) ---
 @app.route('/')
+# --- RUTA 1: INICIO (DASHBOARD) ---
+@app.route('/')
 def inicio():
+    # 1. Capturar la fecha de búsqueda ingresada por el usuario
+    fecha_busqueda = request.args.get('fecha')
+
     if 'usuario_id' not in session:
         return render_template(
             'index.html', 
@@ -69,27 +82,31 @@ def inicio():
             metrics={}, 
             eventos=[], 
             eventos_cartelera=[],
-            eventos_inscritos_ids=[]
+            eventos_inscritos_ids=[],
+            fecha_seleccionada=fecha_busqueda
         )
     
     usuario_id = session['usuario_id']
     
     try:
-        # 1. Obtener la cartelera completa con el estado de inscripción del usuario
-        eventos_cartelera = evento_repo.obtener_eventos_cartelera_publica(usuario_id)
+        # 2. Obtener la cartelera completa con el estado de inscripción del usuario
+        eventos_cartelera = evento_repo.obtener_eventos_cartelera_publica(usuario_id) if hasattr(evento_repo, 'obtener_eventos_cartelera_publica') else []
         
-        # 2. Extraer solo los IDs de los eventos donde el usuario ya está inscrito
+        # 3. Extraer solo los IDs de los eventos donde el usuario ya está inscrito
         eventos_inscritos_ids = [
             ev['id'] for ev in eventos_cartelera if ev.get('esta_inscrito', 0) > 0
         ]
 
-        # 3. Métricas y Próximos eventos
-        metrics = evento_repo.obtener_metricas_dashboard()  
-        eventos_proximos = evento_repo.obtener_proximos_eventos(limite=5)
+        # 4. FILTRAR POR FECHA (Si el usuario seleccionó una fecha en el buscador)
+        if fecha_busqueda:
+            eventos_cartelera = [
+                ev for ev in eventos_cartelera 
+                if str(ev.get('fecha')) == fecha_busqueda
+            ]
 
+        # 5. Métricas y Próximos eventos
         metrics = evento_repo.obtener_metricas_dashboard()  
         eventos_proximos = evento_repo.obtener_proximos_eventos(usuario_id) if hasattr(evento_repo, 'obtener_proximos_eventos') else []
-        eventos_cartelera = evento_repo.obtener_eventos_cartelera_publica(usuario_id) if hasattr(evento_repo, 'obtener_eventos_cartelera_publica') else []
 
     except Exception as e:
         print(f"Error al cargar métricas del inicio: {e}")
@@ -104,6 +121,7 @@ def inicio():
         eventos=eventos_proximos or eventos_cartelera, 
         eventos_cartelera=eventos_cartelera, 
         eventos_inscritos_ids=eventos_inscritos_ids,
+        fecha_seleccionada=fecha_busqueda, # 👈 Se envía la fecha seleccionada a la plantilla
         anonimo=False
     )
 
@@ -115,7 +133,7 @@ def registro():
         nombre = request.form.get('nombre')
         cedula = request.form.get('cedula', '').strip()
         correo = request.form.get('correo')
-        password = request.form.get('password')
+        password = request.form.get('contrasena')
         rol = request.form.get('rol')
 
         cedula_clean = clean_input_strict(cedula)
@@ -170,47 +188,72 @@ def login():
 
 
 # --- RUTA 4: RECUPERACIÓN DE ACCESO ---
+
+# 1. VERIFICAR CÉDULA Y CORREO
 @app.route('/recuperar-acceso', methods=['GET', 'POST'])
 def recuperar_acceso():
     if request.method == 'POST':
-        cedula = request.form.get('cedula')
-        correo = request.form.get('correo')
+        cedula = request.form.get('cedula', '').strip()
+        correo = request.form.get('correo', '').strip()
 
-        cedula_clean = clean_input_strict(cedula)
-        usuario = usuario_repo.obtener_usuario_por_cedula_y_correo(cedula_clean, correo)
+        conexion = obtener_conexion()
+        try:
+            with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
+                # Validar que existan ambos datos en la BD
+                cursor.execute(
+                    "SELECT id FROM usuarios WHERE cedula = %s AND correo = %s;", 
+                    (cedula, correo)
+                )
+                usuario = cursor.fetchone()
+        finally:
+            conexion.close()
 
         if usuario:
-            token = serializer.dumps(usuario['correo'], salt='recuperar-password-salt')
-            url_recuperacion = url_for('redefinir_password', token=token, _external=True)
+            # Guardamos la verificación en la sesión del servidor
+            session['recuperar_usuario_id'] = usuario['id']
             
-            flash(f"🔑 Enlace de recuperación generado: {url_recuperacion}", "success")
-            return redirect(url_for('login'))
+            # REDIRECCIÓN DIRECTA a la función redefinir_password
+            return redirect(url_for('redefinir_password'))
         else:
-            flash("❌ Los datos provistos no coinciden con ningún usuario registrado.", "error")
+            flash("❌ Cédula o correo electrónico incorrectos.", "error")
+            return redirect(url_for('recuperar_acceso'))
 
-    return render_template('recuperar_acceso.html')
+    return render_template('recuperar.html')
 
 
-@app.route('/recuperar-acceso/redefinir/<token>', methods=['GET', 'POST'])
-def redefinir_password(token):
-    try:
-        correo = serializer.loads(token, salt='recuperar-password-salt', max_age=600)
-    except Exception:
-        flash("❌ El enlace de recuperación es inválido o ha expirado.", "error")
-        return redirect(url_for('login'))
+# 2. CAMBIAR LA CONTRASEÑA DIRECTAMENTE
+@app.route('/redefinir-clave', methods=['GET', 'POST'])
+def redefinir_password():
+    # Seguridad: solo se entra si pasó por el paso anterior
+    usuario_id = session.get('recuperar_usuario_id')
+    if not usuario_id:
+        flash("Por favor verifica tus datos primero.", "warning")
+        return redirect(url_for('recuperar_acceso'))
 
     if request.method == 'POST':
-        nueva_password = request.form.get('password')
-        usuario = usuario_repo.obtener_usuario_por_correo(correo)
+        nueva_clave = request.form.get('password', '').strip()
         
-        if usuario:
-            nuevo_hash = hash_password(nueva_password)
-            usuario_repo.actualizar_contrasena_por_id(usuario['id'], nuevo_hash)
-            flash("✅ Tu contraseña ha sido actualizada con éxito. Ya puedes ingresar.", "success")
-            return redirect(url_for('login'))
-            
-    return render_template('redefinir_password.html', token=token)
+        # Encriptamos la clave nueva
+        clave_hash = generate_password_hash(nueva_clave)
 
+        conexion = obtener_conexion()
+        try:
+            with conexion.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE usuarios SET contrasena_hash = %s WHERE id = %s;", 
+                    (clave_hash, usuario_id)
+                )
+            conexion.commit()
+        finally:
+            conexion.close()
+
+        # Limpiamos la variable de sesión
+        session.pop('recuperar_usuario_id', None)
+
+        flash("🎉 ¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.", "success")
+        return redirect(url_for('login'))
+
+    return render_template('redefinir_password.html')
 
 # --- RUTA 5: SOLICITAR ESPACIOS ---
 @app.route('/solicitar', methods=['GET', 'POST'])
@@ -357,25 +400,25 @@ def difundir_evento(evento_id):
         flash('Debe iniciar sesión para acceder a esta función.', 'error')
         return redirect(url_for('login'))
 
-    conexion = obtener_conexion()
     try:
-        with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute("""
-                SELECT e.*, 
-                       esp.nombre AS espacio_nombre
-                FROM eventos e
-                LEFT JOIN espacios esp ON e.espacio_id = esp.id
-                WHERE e.id = %s
-            """, (evento_id,))
-            evento = cursor.fetchone()
-            print("DATOS DEL EVENTO:", evento)
+        # 1. Consulta limpia a través del repositorio
+        evento = obtener_evento_difusion(evento_id)
+        print(evento)
         if not evento:
             flash('El evento solicitado no existe.', 'error')
             return redirect(url_for('inicio'))
 
+        # 2. Formateo seguro de fechas y horas
         evento['inicio_formateado'] = str(evento['hora_inicio'])[:5] if evento.get('hora_inicio') else '--:--'
         evento['fin_formateado'] = str(evento['hora_fin'])[:5] if evento.get('hora_fin') else '--:--'
         evento['fecha_formateada'] = str(evento['fecha']) if evento.get('fecha') else 'Sin fecha'
+
+        # 3. Verificación de la descripción
+        desc = evento.get('descripcion')
+        if desc and str(desc).strip():
+            evento['descripcion'] = str(desc).strip()
+        else:
+            evento['descripcion'] = None
 
         return render_template('difundir_evento.html', evento=evento)
 
@@ -383,9 +426,6 @@ def difundir_evento(evento_id):
         print(f"❌ ERROR EN DIFUSIÓN: {e}")
         flash('Error al generar la plantilla de difusión.', 'error')
         return redirect(url_for('inicio'))
-    finally:
-        if conexion:
-            conexion.close()
 
 
 # --- PROPUESTAS DE ESTUDIANTES ---
@@ -535,6 +575,12 @@ def inscribir_evento(evento_id):
     if 'usuario_id' not in session:
         flash("Debe iniciar sesión para inscribirse a los eventos.", "warning")
         return redirect(url_for('login'))
+
+    # 🛑 PROTECCIÓN: Consultar evento y bloquear si está cancelado
+    evento = evento_repo.obtener_evento_por_id(evento_id)  # Ajusta al nombre de tu función que busca el evento
+    if evento and str(evento.get('estado', '')).lower() == 'cancelado':
+        flash("🚫 No es posible inscribirse: Este evento ha sido cancelado.", "warning")
+        return redirect(request.referrer or url_for('inicio'))
 
     usuario_id = session['usuario_id']
     resultado = registrar_inscripcion_segura(evento_id, usuario_id)
@@ -991,6 +1037,103 @@ def gestionar_postulacion(postulacion_id, accion):
         
     return redirect(url_for('detalle_evento', evento_id=evento_id))
 
+# --- RUTAS DE ADMINISTRACIÓN DE PROPUESTAS ---
+
+@app.route('/admin/propuesta/aprobar/<int:propuesta_id>', methods=['GET', 'POST'])
+def aprobar_propuesta(propuesta_id):
+    rol_actual = str(session.get('usuario_rol', '')).strip().upper()
+    if rol_actual not in ['ADMINISTRATIVO', 'ADMINISTRADOR', 'ADMIN']:
+        flash('Acceso no autorizado.', 'error')
+        return redirect(url_for('inicio'))
+
+    propuesta = obtener_propuesta_por_id(propuesta_id)
+
+    if not propuesta:
+        flash('La propuesta no existe.', 'error')
+        return redirect(url_for('admin'))
+
+    if request.method == 'POST':
+        fecha = request.form.get('fecha')
+        hora_inicio = request.form.get('hora_inicio')
+        hora_fin = request.form.get('hora_fin')
+        espacio_id = request.form.get('espacio_id')
+
+        res = aceptar_y_agendar_propuesta(propuesta_id, fecha, hora_inicio, hora_fin, espacio_id)
+        if res['exito']:
+            flash(res['mensaje'], 'success')
+            return redirect(url_for('admin'))
+        else:
+            flash(res['mensaje'], 'error')
+
+    espacios = obtener_lista_espacios_formulario()
+    return render_template('aprobar_propuesta_form.html', propuesta=propuesta, espacios=espacios)
+
+
+@app.route('/admin/propuesta/rechazar/<int:propuesta_id>', methods=['POST'])
+def rechazar_propuesta(propuesta_id):
+    rol_actual = str(session.get('usuario_rol', '')).strip().upper()
+    if rol_actual not in ['ADMINISTRATIVO', 'ADMINISTRADOR', 'ADMIN']:
+        flash('Acceso no autorizado.', 'error')
+        return redirect(url_for('inicio'))
+
+    if rechazar_propuesta_estudiante(propuesta_id):
+        flash('La propuesta ha sido rechazada.', 'info')
+    else:
+        flash('No se pudo procesar la solicitud.', 'error')
+    return redirect(url_for('admin'))
+
+
+# --- RUTA PARA QUE EL ESTUDIANTE EDITE SU PROPUESTA ---
+
+# --- EDITAR PROPUESTA DE ESTUDIANTE ---
+@app.route('/propuesta/editar/<int:propuesta_id>', methods=['GET', 'POST'])
+@requerir_rol(['estudiante'])
+def editar_propuesta(propuesta_id):
+    usuario_id = session.get('usuario_id')
+
+    # Obtener la propuesta
+    propuesta = evento_repo.obtener_propuesta_por_id(propuesta_id)
+
+    # Validar existencia y propiedad
+    if not propuesta or propuesta.get('estudiante_id') != usuario_id:
+        flash("❌ No tienes permisos para editar esta propuesta o no existe.", "error")
+        return redirect(url_for('mis_propuestas'))
+
+    # Validar estado (solo editable si está en revisión / pendiente)
+    estado = str(propuesta.get('estado', '')).lower()
+    if estado not in ['pendiente', 'en revision', 'en revisión']:
+        flash("⚠️ No puedes editar propuestas que ya han sido evaluadas.", "error")
+        return redirect(url_for('mis_propuestas'))
+
+    if request.method == 'POST':
+        titulo = request.form.get('titulo')
+        departamento = request.form.get('departamento')
+        tipo_actividad = request.form.get('tipo_actividad')
+        descripcion = request.form.get('descripcion')
+
+        # Validar campos obligatorios
+        if not all([titulo, tipo_actividad, descripcion]):
+            flash("❌ Por favor complete todos los campos requeridos.", "error")
+            return redirect(url_for('editar_propuesta', propuesta_id=propuesta_id))
+
+        # Actualización en repositorio
+        exito = evento_repo.editar_propuesta_estudiante(
+            propuesta_id=propuesta_id,
+            estudiante_id=usuario_id,
+            titulo=titulo,
+            departamento=departamento,
+            tipo_actividad=tipo_actividad,
+            descripcion=descripcion
+        )
+
+        if exito:
+            flash("✏️ Propuesta actualizada correctamente.", "success")
+            return redirect(url_for('mis_propuestas'))
+        else:
+            flash("❌ Error al actualizar la propuesta.", "error")
+            return redirect(url_for('editar_propuesta', propuesta_id=propuesta_id))
+
+    return render_template('editar_propuesta.html', propuesta=propuesta)
 
 # --- SALIDA DEL SISTEMA ---
 @app.route('/logout')
