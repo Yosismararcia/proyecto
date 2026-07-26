@@ -350,22 +350,25 @@ def obtener_propuesta_por_id(propuesta_id):
         conexion.close()
 
 
-def obtener_propuestas_totales_admin():
-    """Lista completa de propuestas estudiantiles con estado y autor para el Panel Admin."""
-    conexion = obtener_conexion()
-    try:
-        with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute("""
-                SELECT p.id, p.titulo, p.departamento, p.tipo_actividad, p.descripcion, p.estado, 
-                       p.fecha_propuesta, p.hora_inicio, p.hora_fin, p.espacio_id,
-                       u.nombre AS estudiante
-                FROM propuestas_estudiantes p
-                JOIN usuarios u ON p.estudiante_id = u.id 
-                ORDER BY p.id DESC;
-            """)
-            return cursor.fetchall()
-    finally:
-        conexion.close()
+def obtener_propuestas_totales_admin(self):
+    cursor = self.db.cursor(pymysql.cursors.DictCursor)
+    
+    # Consulta limpia: SIN hora_inicio, SIN fecha_propuesta_evento
+    sql = """
+        SELECT 
+            p.id, 
+            p.titulo, 
+            p.descripcion, 
+            p.departamento, 
+            p.tipo_actividad, 
+            p.estado,
+            p.fecha_creacion
+        FROM propuestas p
+        ORDER BY p.id DESC
+    """
+    
+    cursor.execute(sql)
+    return cursor.fetchall()
 
 
 def obtener_mis_propuestas_estudiante(estudiante_id):
