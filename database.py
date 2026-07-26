@@ -114,7 +114,7 @@ def obtener_datos_certificado_bd(evento_id, usuario_id):
                     u.rol AS usuario_rol,
                     e.titulo AS evento_titulo,
                     e.fecha AS evento_fecha,
-                    i.asistio
+                    i.asistio AS asistio
                 FROM inscripciones i
                 JOIN usuarios u ON i.usuario_id = u.id
                 JOIN eventos e ON i.evento_id = e.id
@@ -138,7 +138,7 @@ def obtener_inscritos_evento_bd(evento_id):
                     i.id AS inscripcion_id,
                     i.usuario_id,
                     i.fecha_inscripcion,
-                    i.asistio,
+                    i.asistio AS asistio,
                     i.estado,
                     u.nombre,
                     u.correo,
