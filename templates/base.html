@@ -2,42 +2,22 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- ETIQUETA OBLIGATORIA PARA CELULARES -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SGJC - FaCyT{% endblock %}</title>
     
-    <!-- Tus estilos CSS, FontAwesome, etc. -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CDN de FontAwesome cargado correctamente con crossorigin -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <style>
-        /* CSS Base Responsivo */
-        *, *::before, *::after {
-            box-sizing: border-box;
+        /* === RESET BASICO (SIN FORZAR FONT-FAMILY EN TODO) === */
+        *, *::before, *::after { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
         }
-        body {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden; /* Previene scroll horizontal */
-        }
-        
-        /* Ajustes automáticos para pantallas pequeñas (Celulares) */
-        @media (max-width: 768px) {
-            main, article, div {
-                max-width: 100% !important;
-            }
-            .btn {
-                width: 100% !important;
-                justify-content: center !important;
-                margin-bottom: 8px;
-            }
-        }
-    </style>
-
-    <style>
-        /* === RESET Y PALETA DE ALTO CONTRASTE === */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
         
         body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: #cbd5e1;
             color: #0f172a; 
             min-height: 100vh; 
@@ -45,20 +25,28 @@
             flex-direction: column; 
             font-size: 15px;
             line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* Aseguramos que los íconos siempre usen la tipografía de FontAwesome */
+        i.fa-solid, i.fa-brands, i.fa-regular, .fa {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
         }
         
         a { text-decoration: none; color: inherit; }
 
-        /* === HEADER ÚNICO Y PERMANENTE === */
+        /* === HEADER RESPONSIVO === */
         header.main-header {
             background-color: #0f172a;
             color: #ffffff;
             border-bottom: 4px solid #1d4ed8;
-            padding: 0 24px;
-            height: 64px;
+            padding: 12px 20px;
+            min-height: 64px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
@@ -81,23 +69,25 @@
 
         .nav-items {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             list-style: none;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .nav-link {
-            padding: 8px 14px;
+            padding: 8px 12px;
             border-radius: 6px;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 700;
             color: #f1f5f9;
             background: #1e293b;
             border: 1px solid #334155;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .nav-link:hover {
@@ -116,229 +106,39 @@
         }
 
         /* === ESTRUCTURA PRINCIPAL === */
-        /* === ESTRUCTURA PRINCIPAL === */
         main.main-wrapper {
             max-width: 1300px;
             width: 100%;
-            margin: 24px auto;
+            margin: 20px auto;
             padding: 0 16px;
             flex: 1;
             display: grid;
-            gap: 24px;
-            /* Por defecto: 1 columna centrada (sin sesión) */
+            gap: 20px;
             grid-template-columns: 1fr; 
         }
 
-        /* Si el usuario tiene sesión activa: 2 columnas */
-        main.main-wrapper.con-sidebar {
-            grid-template-columns: 1fr 310px;
+        @media (min-width: 901px) {
+            main.main-wrapper.con-sidebar {
+                grid-template-columns: 1fr 310px;
+            }
         }
 
-        /* Estilo para cuando no hay sesión */
-        .unauth-container {
-            max-width: 520px;
-            margin: 40px auto;
-            width: 100%;
-        }
-
-        /* === TARJETAS DEL CONTENIDO CENTRAL === */
-        .card {
+        /* === TARJETAS === */
+        .card, .content-card, .sidebar-card {
             background: #ffffff;
             border: 1px solid #94a3b8;
             border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #0f172a;
-            padding-bottom: 12px;
-            margin-bottom: 18px;
-            border-bottom: 2px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* === CUADRÍCULA DE ESTADÍSTICAS HORIZONTAL === */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            padding: 16px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .stat-card-title {
-            font-size: 0.78rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        .stat-card-value {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: #1d4ed8;
-        }
-
-        /* === TABLAS CON ESPACIO Y FORMATO REAL === */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            border: 1px solid #94a3b8;
-            border-radius: 10px;
-            background: #ffffff;
-            margin-top: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background-color: #0f172a;
-            color: #ffffff;
-            font-size: 0.8rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            padding: 14px 18px;
-            border-bottom: 2px solid #334155;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 14px 18px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: #1e293b;
-            border-bottom: 1px solid #e2e8f0;
-            vertical-align: middle;
-            line-height: 1.5;
-        }
-
-        tr:nth-child(even) td { background-color: #f8fafc; }
-        tr:hover td { background-color: #f1f5f9; }
-
-        /* === FORMULARIOS E INPUTS MEJORADOS === */
-        .form-group {
+            padding: 20px;
             margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #1e293b;
-            margin-bottom: 6px;
-        }
-
-        input[type="text"], 
-        input[type="email"], 
-        input[type="password"], 
-        input[type="date"], 
-        input[type="time"],
-        input[type="url"], 
-        select, 
-        textarea {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
             width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #94a3b8;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            background-color: #ffffff;
-            color: #0f172a;
-            outline: none;
-            transition: all 0.2s;
         }
 
-        input:focus, select:focus, textarea:focus {
-            border-color: #1d4ed8;
-            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
-        }
-
-        /* === BOTONES === */
-        .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 18px;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px 18px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .btn-primary { background: #1d4ed8; color: #ffffff; }
-        .btn-primary:hover { background: #1e40af; }
-
-        .btn-dark { background: #0f172a; color: #ffffff; }
-        .btn-dark:hover { background: #1e293b; }
-
-        .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
-        .btn-secondary:hover { background: #e2e8f0; }
-
-        .btn-disabled { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; cursor: default; }
-
-        .btn-block { width: 100%; }
-
-        /* === BADGES === */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .badge-role { background: #1d4ed8; color: #ffffff; }
-        .badge-approved { background: #166534; color: #ffffff; }
-        .badge-pending { background: #b45309; color: #ffffff; }
-
-        /* === SIDEBAR (SOLO AUTENTICADO) === */
-        .sidebar-card {
-            background: #ffffff;
-            border: 1px solid #94a3b8;
-            border-radius: 12px;
-            padding: 18px;
-            margin-bottom: 18px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .sidebar-title {
-            font-size: 0.88rem;
+        .card-title, .sidebar-title, .card-header {
+            font-size: 1.05rem;
             font-weight: 800;
             color: #0f172a;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             padding-bottom: 8px;
             border-bottom: 2px solid #e2e8f0;
             display: flex;
@@ -346,24 +146,52 @@
             gap: 8px;
         }
 
-        /* === FOOTER ÚNICO === */
-        footer.main-footer {
-            background-color: #0f172a;
-            color: #94a3b8;
-            border-top: 3px solid #1d4ed8;
-            padding: 16px;
-            text-align: center;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: auto;
+        /* === TABLAS CON SCROLL RESPONSIVO === */
+        .table-container, .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #94a3b8;
+            border-radius: 10px;
+            background: #ffffff;
+            margin-top: 10px;
+            margin-bottom: 16px;
         }
 
-        footer.main-footer strong { color: #ffffff; }
+        table, .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 550px;
+        }
 
-        /* === ESTILOS GLOBALES DE FORMULARIOS === */
+        th {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 12px 14px;
+            border-bottom: 2px solid #334155;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) td { background-color: #f8fafc; }
+        tr:hover td { background-color: #f1f5f9; }
+
+        /* === FORMULARIOS === */
         label {
             display: block;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 800;
             color: #0f172a;
             margin-top: 12px;
@@ -373,8 +201,11 @@
 
         input[type="text"], 
         input[type="number"], 
+        input[type="email"], 
+        input[type="password"], 
         input[type="date"], 
         input[type="time"], 
+        input[type="url"], 
         select, 
         textarea {
             width: 100%;
@@ -394,7 +225,7 @@
             outline: 2px solid #1d4ed8;
         }
 
-        /* === ESTILOS GLOBALES DE BOTONES === */
+        /* === BOTONES === */
         .btn {
             padding: 10px 18px;
             border-radius: 6px;
@@ -408,6 +239,7 @@
             gap: 8px;
             text-decoration: none;
             transition: background 0.2s;
+            box-sizing: border-box;
         }
 
         .btn-primary { background: #1d4ed8; color: #ffffff; }
@@ -425,13 +257,61 @@
         .btn-telegram { background: #0088cc; color: #ffffff; }
         .btn-email { background: #dc2626; color: #ffffff; }
 
-        h2 {
-            font-size: 1.45rem;
+        /* === BADGES === */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
             font-weight: 800;
-            color: #0f172a;
-            margin-top: 0;
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+
+        .badge-role { background: #1d4ed8; color: #ffffff; }
+        .badge-approved { background: #166534; color: #ffffff; }
+        .badge-pending { background: #b45309; color: #ffffff; }
+
+        /* === FOOTER === */
+        footer.main-footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            border-top: 3px solid #1d4ed8;
+            padding: 16px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: auto;
+        }
+
+        footer.main-footer strong { color: #ffffff; }
+
+        /* === MOVIL === */
+        @media (max-width: 650px) {
+            header.main-header {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .nav-items {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-link {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+            }
+
+            .card, .content-card, .sidebar-card {
+                padding: 14px;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 4px;
+            }
         }
     </style>
 </head>
@@ -461,31 +341,29 @@
     </header>
 
     <!-- CONTENIDO CENTRAL -->
-        <main class="main-wrapper {% if session.get('usuario_id') %}con-sidebar{% endif %}">        <section>
-            <!-- BLOQUE GLOBAL DE AVISOS Y NOTIFICACIONES -->
+    <main class="main-wrapper {% if session.get('usuario_id') %}con-sidebar{% endif %}">
+        <section>
+            <!-- AVISOS Y NOTIFICACIONES -->
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; width: 100%;">
                 {% for category, message in messages %}
                     {% set cat = category|lower %}
                     
-                    <!-- Alerta de Error / Peligro -->
                     {% if cat in ['error', 'danger'] %}
-                    <div style="background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 14px 18px; border-radius: 10px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 10px; box-sizing: border-box;">
+                    <div style="background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px 16px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; gap: 10px;">
                         <i class="fa-solid fa-circle-xmark" style="color: #dc2626; font-size: 1.1rem;"></i>
                         <span>{{ message }}</span>
                     </div>
 
-                    <!-- Alerta de Advertencia -->
                     {% elif cat == 'warning' %}
-                    <div style="background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 14px 18px; border-radius: 10px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 10px; box-sizing: border-box;">
+                    <div style="background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 12px 16px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; gap: 10px;">
                         <i class="fa-solid fa-triangle-exclamation" style="color: #d97706; font-size: 1.1rem;"></i>
                         <span>{{ message }}</span>
                     </div>
 
-                    <!-- Alerta de Éxito / Confirmación -->
                     {% else %}
-                    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 14px 18px; border-radius: 10px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 10px; box-sizing: border-box;">
+                    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px 16px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; gap: 10px;">
                         <i class="fa-solid fa-circle-info" style="color: #15803d; font-size: 1.1rem;"></i>
                         <span>{{ message }}</span>
                     </div>
@@ -498,7 +376,7 @@
             {% block content %}{% endblock %}
         </section>
 
-        <!-- BARRA LATERAL (RESTAURADA POR COMPLETO) -->
+        <!-- BARRA LATERAL -->
         {% if session.get('usuario_id') %}
         <aside>
             <div class="sidebar-card">
