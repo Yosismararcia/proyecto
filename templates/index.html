@@ -30,26 +30,26 @@
         </div>
     </div>
 {% else %}
-        <!-- DASHBOARD DE USUARIOS AUTENTICADOS -->
+    <!-- DASHBOARD DE USUARIOS AUTENTICADOS -->
     <div style="margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px;">
             <i class="fa-solid fa-chart-pie" style="color: #1d4ed8;"></i> Estadísticas del Sistema
         </h2>
 
-        <!-- BOTONES DE ACCIÓN RÁPIDA -->
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <!-- Botón para ver el historial de mis propuestas -->
-            {% if session.get('usuario_rol') == 'estudiante' %}
+        <!-- BOTONES DE ACCIÓN RÁPIDA (VISIBLES ÚNICAMENTE PARA ESTUDIANTES) -->
+        {% if session.get('usuario_rol') in ['estudiante'] %}
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <!-- Botón para ver el historial de mis propuestas -->
                 <a href="{{ url_for('mis_propuestas') }}" class="btn btn-secondary" style="padding: 10px 16px; font-size: 0.88rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: #334155; color: #ffffff; border-radius: 6px;">
                     <i class="fa-solid fa-list-check"></i> Mis Propuestas
                 </a>
-            {% endif %}
 
-            <!-- Botón para proponer nueva actividad -->
-            <a href="{{ url_for('proponer') }}" class="btn btn-primary" style="padding: 10px 16px; font-size: 0.88rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: #2563eb; color: #ffffff; border-radius: 6px; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">
-                <i class="fa-solid fa-lightbulb"></i> Proponer Nueva Actividad
-            </a>
-        </div>
+                <!-- Botón para proponer nueva actividad -->
+                <a href="{{ url_for('proponer') }}" class="btn btn-primary" style="padding: 10px 16px; font-size: 0.88rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: #2563eb; color: #ffffff; border-radius: 6px; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">
+                    <i class="fa-solid fa-lightbulb"></i> Proponer Nueva Actividad
+                </a>
+            </div>
+        {% endif %}
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
