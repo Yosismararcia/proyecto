@@ -357,7 +357,7 @@ def obtener_propuestas_totales_admin():
         with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("""
                 SELECT p.id, p.titulo, p.departamento, p.tipo_actividad, p.descripcion, p.estado, 
-                       p.fecha_propuesta_evento, p.hora_inicio, p.hora_fin, p.espacio_id,
+                       p.fecha_propuesta, p.hora_inicio, p.hora_fin, p.espacio_id,
                        u.nombre AS estudiante
                 FROM propuestas_estudiantes p
                 JOIN usuarios u ON p.estudiante_id = u.id 
