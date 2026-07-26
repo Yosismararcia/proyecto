@@ -2,11 +2,36 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- ETIQUETA OBLIGATORIA PARA CELULARES -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SGJC - FaCyT UC{% endblock %}</title>
-
-    <!-- Iconos de interfaz -->
+    <title>{% block title %}SGJC - FaCyT{% endblock %}</title>
+    
+    <!-- Tus estilos CSS, FontAwesome, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS Base Responsivo */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Previene scroll horizontal */
+        }
+        
+        /* Ajustes automáticos para pantallas pequeñas (Celulares) */
+        @media (max-width: 768px) {
+            main, article, div {
+                max-width: 100% !important;
+            }
+            .btn {
+                width: 100% !important;
+                justify-content: center !important;
+                margin-bottom: 8px;
+            }
+        }
+    </style>
 
     <style>
         /* === RESET Y PALETA DE ALTO CONTRASTE === */
