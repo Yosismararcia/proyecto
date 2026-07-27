@@ -1,45 +1,34 @@
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file, make_response
 import pymysql
 import qrcode
 import os
-import io
-from flask import send_file
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from werkzeug.security import generate_password_hash, check_password_hash
+import time
 import csv
+from core.security import (
+    obtener_serializer,
+    clean_input_strict,
+    requerir_rol,
+    hash_password,
+    verificar_password,
+    generar_codigo_certificado
+)
+from core.validators import validar_cedula_institucional
 import io
-import os
-from flask import render_template, redirect, url_for, flash, session, request, make_response
 from werkzeug.utils import secure_filename
 
-# 1. Importación de Repositorios
+# Repositorios: importamos tanto el módulo (para llamadas como evento_repo.func())
+# como sus funciones en el namespace para mantener compatibilidad con el código existente.
 import repositories.evento_repository as evento_repo
+from repositories.evento_repository import *
 import repositories.usuario_repository as usuario_repo
-
-from repositories.inscripcion_repository import (
-    registrar_inscripcion_segura,
-    obtener_inscritos_por_evento  # 👈 Importar aquí
-)
-from repositories.evento_repository import (
-    obtener_metricas_dashboard,
-    obtener_solicitudes_totales_admin,
-    obtener_propuestas_totales_admin,
-    eliminar_propuesta_estudiante  # <--- Agrega la nueva función aquí
-)
-# 2. Importación de Módulos Core y Seguridad
-from core.security import (
-    hash_password, 
-    verificar_password, 
-    requerir_rol, 
-    obtener_serializer,
-    clean_input_strict
-)
-
-from core.validators import validar_cedula_format, validar_cedula_institucional
-from repositories.evento_repository import obtener_evento_difusion  # Ajusta el nombre de la importación
+from repositories.usuario_repository import *
+import repositories.inscripcion_repository as inscripcion_repo
+from repositories.inscripcion_repository import *
 #importacion de modulos de database por nuevas modificaciones
 from database import (
     obtener_conexion,
@@ -59,8 +48,6 @@ from database import (
     crear_tarea_voluntariado_bd,
     cambiar_estado_postulacion_bd
 )
-
-
 
 app = Flask(__name__)
 # Clave secreta para cifrar cookies de sesión y firmar tokens
@@ -177,6 +164,7 @@ def login():
             session['usuario_id'] = usuario['id']
             session['usuario_nombre'] = usuario['nombre']
             session['usuario_rol'] = usuario['rol']
+            session['rol'] = usuario['rol']
             
             flash(f"¡Bienvenido de nuevo, {usuario['nombre']}! 👋", "success")
             return redirect(url_for('inicio'))
@@ -603,31 +591,49 @@ def ver_inscritos_evento(evento_id):
         flash("Debes iniciar sesión para acceder.", "warning")
         return redirect(url_for('login'))
 
-    # Se busca el rol en 'usuario_rol' o 'rol' para evitar incompatibilidades
+    usuario_id = session.get('usuario_id')
     rol_actual = str(session.get('usuario_rol') or session.get('rol') or '').lower()
     
-    # Incluimos 'administrativo' y 'admin' en los roles permitidos
     roles_autorizados = ['administrador', 'admin', 'administrativo', 'profesor', 'ponente']
     
     if rol_actual not in roles_autorizados:
         flash("⛔ No tienes permisos para ver esta lista.", "error")
         return redirect(url_for('inicio'))
 
-    # Obtenemos evento e inscritos mediante database.py
+    # Obtenemos el detalle del evento
     evento = obtener_detalle_evento_bd(evento_id)
     if not evento:
         flash("El evento solicitado no existe.", "error")
         return redirect(url_for('inicio'))
 
+    # 🔒 VALIDACIÓN DE PROPIEDAD DE EVENTO
+    roles_admin = ['administrador', 'admin', 'administrativo']
+    id_organizador = evento.get('organizador_id') or evento.get('usuario_id') or evento.get('creador_id') or evento.get('responsable_id')
+
+    if rol_actual not in roles_admin and usuario_id != id_organizador:
+        flash("⛔ Solo el profesor a cargo de este evento puede ver y exportar la lista de inscritos.", "error")
+        return redirect(url_for('inicio'))
+
+    # Autorización para subir material en la plantilla
+    puede_subir_material = (
+        rol_actual == 'administrativo' or
+        usuario_id == evento.get('responsable_id') or
+        usuario_id == evento.get('organizador_id') or
+        usuario_id == evento.get('usuario_id')
+    )
+
+    # Obtenemos inscritos y los materiales cargados al repositorio
     inscritos = obtener_inscritos_evento_bd(evento_id) or []
+    materiales = obtener_materiales_repositorio(evento_id) or []  # Función de BD para traer adjuntos
 
     return render_template(
         'ver_inscritos.html', 
         evento=evento, 
         inscritos=inscritos,
-        total_inscritos=len(inscritos)
+        total_inscritos=len(inscritos),
+        materiales=materiales,
+        puede_subir_material=puede_subir_material
     )
-
 @app.route('/ponente/evento/<int:evento_id>/inscritos')
 def ponente_ver_inscritos(evento_id):
     """Ruta directa para que el ponente/profesor consulte la lista de asistencia."""
@@ -635,24 +641,32 @@ def ponente_ver_inscritos(evento_id):
         flash("Debes iniciar sesión para acceder.", "warning")
         return redirect(url_for('login'))
 
+    usuario_id = session['usuario_id']
     rol_actual = str(session.get('usuario_rol') or session.get('rol') or '').lower()
     if rol_actual not in ['ponente', 'profesor', 'administrativo', 'admin']:
         flash("Acceso denegado: Esta vista es solo para ponentes y profesores.", "error")
         return redirect(url_for('inicio'))
 
-    evento = evento_repo.obtener_evento_por_id(evento_id)
+    evento = obtener_detalle_evento_bd(evento_id)
     if not evento:
         flash("El evento solicitado no existe.", "error")
         return redirect(url_for('mis_solicitudes'))
 
     inscritos = obtener_inscritos_por_evento(evento_id) or []
+    puede_subir_material = (
+        rol_actual == 'administrativo' or
+        usuario_id == evento.get('responsable_id') or
+        usuario_id == evento.get('organizador_id') or
+        usuario_id == evento.get('usuario_id')
+    )
 
     # Renderiza la vista consolidada de asistencia
     return render_template(
         'ver_inscritos.html', 
         evento=evento, 
         inscritos=inscritos,
-        total_inscritos=len(inscritos)
+        total_inscritos=len(inscritos),
+        puede_subir_material=puede_subir_material
     )
 
 # ==========================================
@@ -687,12 +701,25 @@ def detalle_evento(evento_id):
         
         inscripcion = obtener_inscripcion_usuario_bd(evento_id, session['usuario_id'])
 
+        # Obtener los archivos cargados en el repositorio del evento
+        materiales = obtener_materiales_repositorio(evento_id) or []
+
+        puede_subir_material = (
+            session.get('usuario_rol') == 'administrativo' or
+            session.get('rol') == 'administrativo' or
+            usuario_id == evento.get('responsable_id') or
+            usuario_id == evento.get('organizador_id') or
+            usuario_id == evento.get('usuario_id')
+        )
+
         return render_template(
             'detalle_evento.html',
             evento=evento,
             preguntas=preguntas,
             tareas=tareas_voluntariado, # <-- SE ENVÍA LA VARIABLE A LA PLANTILLA
-            inscripcion=inscripcion
+            inscripcion=inscripcion,
+            materiales=materiales,
+            puede_subir_material=puede_subir_material
         )
     except Exception as e:
         print(f"❌ Error en detalle_evento: {e}")
@@ -1139,13 +1166,89 @@ def eliminar_propuesta(propuesta_id):
         
     return redirect(url_for('admin'))  # Ajusta al nombre de tu vista admin
 
+# --- 2. RUTA PARA EXPORTAR ÚNICAMENTE LOS INSCRITOS DE ESTE EVENTO ---
+@app.route('/evento/<int:evento_id>/exportar-csv')
+def exportar_inscritos_csv(evento_id):
+    usuario_id = session.get('usuario_id')
+    rol = str(session.get('usuario_rol') or session.get('rol') or '').lower()
+    evento = obtener_detalle_evento_bd(evento_id)
+
+    if not evento:
+        flash("El evento no existe o ya no está disponible.", "danger")
+        return redirect(url_for('inicio'))
+
+    profesor_encargado_id = evento.get('responsable_id') or evento.get('usuario_id') or evento.get('organizador_id')
+    if rol != 'administrativo' and usuario_id != profesor_encargado_id:
+        flash("No tienes autorización para exportar esta lista.", "danger")
+        return redirect(url_for('inicio'))
+
+    inscritos = obtener_inscritos_por_evento(evento_id)
+
+    # Generación dinámica del archivo CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['#', 'Nombre Completo', 'Cédula', 'Correo Electrónico', 'Fecha Inscripción', 'Estado'])
+
+    for i, p in enumerate(inscritos, start=1):
+        writer.writerow([i, p.get('nombre'), p.get('cedula'), p.get('correo'), p.get('fecha_inscripcion'), p.get('estado')])
+
+    response = make_response(output.getvalue())
+    response.headers["Content-Disposition"] = f"attachment; filename=inscritos_evento_{evento_id}.csv"
+    response.headers["Content-type"] = "text/csv; charset=utf-8"
+    return response
+
+UPLOAD_FOLDER = 'static/uploads/repositorio'
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'ppt', 'pptx', 'zip', 'rar'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/evento/<int:evento_id>/subir-material', methods=['POST'])
+def subir_material_repositorio(evento_id):
+    usuario_id = session.get('usuario_id')
+    rol = str(session.get('usuario_rol') or session.get('rol') or '').lower()
+    evento = obtener_detalle_evento_bd(evento_id)
+
+    if not evento:
+        flash("El evento no existe o ya no está disponible.", "danger")
+        return redirect(url_for('ver_inscritos_evento', evento_id=evento_id))
+
+    # Validación de permiso
+    profesor_encargado_id = evento.get('responsable_id') or evento.get('usuario_id') or evento.get('organizador_id')
+    if rol != 'administrativo' and usuario_id != profesor_encargado_id:
+        flash("No tienes permiso para subir material a este repositorio.", "danger")
+        return redirect(url_for('ver_inscritos_evento', evento_id=evento_id))
+
+    if 'archivo' not in request.files:
+        flash("No se seleccionó ningún archivo.", "warning")
+        return redirect(url_for('ver_inscritos_evento', evento_id=evento_id))
+
+    file = request.files['archivo']
+    titulo_material = request.form.get('titulo_material', 'Material de Apoyo')
+
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        if not filename:
+            flash("El nombre del archivo no es válido.", "warning")
+            return redirect(url_for('ver_inscritos_evento', evento_id=evento_id))
+
+        nombre_unico = f"evento_{evento_id}_{filename}"
+        
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        ruta_guardado = os.path.join(app.config['UPLOAD_FOLDER'], nombre_unico)
+        file.save(ruta_guardado)
+
+        # Guarda la referencia en base de datos (función SQL correspondiente)
+        guardar_material_db(evento_id, titulo_material, nombre_unico)
+        flash(" Archivo subido al repositorio correctamente.", "success")
+
+    return redirect(url_for('ver_inscritos_evento', evento_id=evento_id))
+
+
 # --- SALIDA DEL SISTEMA ---
 @app.route('/logout')
 def logout():
     session.clear()
     flash("Has cerrado sesión de forma segura.", "success")
     return redirect(url_for('inicio'))
-
 
 if __name__ == '__main__':
     app.run(debug=True)

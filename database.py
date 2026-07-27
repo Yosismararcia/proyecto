@@ -1,6 +1,9 @@
 import os
+from dotenv import load_dotenv
 import pymysql
 import pymysql.cursors
+
+load_dotenv()
 
 def obtener_conexion():
     """Establece y retorna una conexión a la base de datos MySQL con dict cursors."""
@@ -14,10 +17,22 @@ def obtener_conexion():
     except (ValueError, TypeError):
         port = 3306
 
-    # Configuración de certificado SSL opcional
+    # Configuración de certificado SSL opcional para Aiven u otros servicios secure
+    ssl_ca = os.getenv('DB_SSL_CA')
+    ssl_cert = os.getenv('DB_SSL_CERT')
+    ssl_key = os.getenv('DB_SSL_KEY')
+    ssl_verify = os.getenv('DB_SSL_VERIFY', 'true').lower() not in ('0', 'false', 'no')
+
     ssl_config = None
-    if os.path.exists('ca.pem'):
-        ssl_config = {'ca': 'ca.pem', 'check_hostname': False}
+    if ssl_ca or ssl_cert or ssl_key:
+        ssl_config = {}
+        if ssl_ca:
+            ssl_config['ca'] = ssl_ca
+        if ssl_cert:
+            ssl_config['cert'] = ssl_cert
+        if ssl_key:
+            ssl_config['key'] = ssl_key
+        ssl_config['check_hostname'] = ssl_verify
 
     return pymysql.connect(
         host=host,

@@ -19,17 +19,55 @@
         </p>
     </div>
 
-    <!-- LADO DERECHO: BOTONES DE ACCIÓN DERECHA Y ESTILIZADOS -->
-    <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
-        {% if inscritos %}
-        <button onclick="exportarCSV()" style="padding: 12px 22px; font-size: 0.95rem; font-weight: 800; color: #ffffff; background: #16a34a; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3); transition: transform 0.1s ease;">
-            <i class="fa-solid fa-file-excel" style="font-size: 1.1rem;"></i> Exportar a Excel (CSV)
-        </button>
+    <!-- BOTÓN EXPORTAR A EXCEL (CSV) -->
+    <a href="{{ url_for('exportar_inscritos_csv', evento_id=evento.id) }}" class="button" style="background-color: #28a745; color: white; border-radius: 6px; padding: 8px 16px; text-decoration: none;">
+        📊 Exportar a Excel (CSV)
+    </a>
+
+    <!-- SECCIÓN: REPOSITORIO CIENTÍFICO E INFORMACIÓN -->
+    <div class="card shadow-sm border-0 rounded-3 my-4 p-4" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;">
+        <h3 style="color: #1f2937; display: flex; align-items: center; gap: 8px; margin-top: 0;">
+            💾 Repositorio Científico e Información del Evento
+        </h3>
+
+        <div style="margin-bottom: 20px;">
+            <strong style="font-size: 0.9rem; color: #374151;">RESUMEN (ABSTRACT):</strong>
+            <p style="background: #f9fafb; border-left: 4px solid #2563eb; padding: 12px; border-radius: 4px; color: #4b5563; margin-top: 6px;">
+                {{ evento.descripcion if evento.descripcion else 'El resumen científico de este evento no ha sido publicado todavía.' }}
+            </p>
+        </div>
+
+        <!-- MATERIALES PUBLICADOS -->
+        <div style="margin-bottom: 20px;">
+            <strong style="font-size: 0.9rem; color: #374151;">MATERIALES Y DOCUMENTOS ADJUNTOS:</strong>
+            <ul style="list-style: none; padding-left: 0; margin-top: 8px;">
+                {% for mat in materiales %}
+                    <li style="padding: 8px 12px; background: #f3f4f6; margin-bottom: 6px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>📄 <strong>{{ mat.titulo }}</strong> ({{ mat.nombre_archivo }})</span>
+                        <a href="{{ url_for('static', filename='uploads/repositorio/' ~ mat.nombre_archivo) }}" download class="btn btn-sm btn-outline-primary" style="padding: 4px 10px; font-size: 0.85rem;">
+                            ⬇️ Descargar
+                        </a>
+                    </li>
+                {% else %}
+                    <li style="color: #888; font-size: 0.9rem;">No hay archivos o guías adjuntas en el repositorio.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- FORMULARIO PARA SUBIR MATERIAL (Visibilidad exclusiva para el Profesor a Cargo o Admin) -->
+        {% if puede_subir_material %}
+        <hr style="border-top: 1px solid #e5e7eb; margin: 15px 0;">
+        <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+            <h4 style="margin-top: 0; font-size: 1rem; color: #1e293b;">📤 Subir Material al Repositorio</h4>
+            <form action="{{ url_for('subir_material_repositorio', evento_id=evento.id) }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <input type="text" name="titulo_material" placeholder="Título o descripción breve del archivo" required style="flex: 1; min-width: 200px; padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc;">
+                <input type="file" name="archivo" required style="font-size: 0.88rem;">
+                <button type="submit" style="background-color: #0f172a; color: white; padding: 6px 16px; border-radius: 6px; border: none; cursor: pointer;">
+                    Subir Archivo
+                </button>
+            </form>
+        </div>
         {% endif %}
-        
-        <a href="{{ url_for('inicio') }}" style="padding: 12px 22px; font-size: 0.95rem; font-weight: 800; color: #ffffff; background: #0f172a; border: none; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.25); transition: transform 0.1s ease;">
-            <i class="fa-solid fa-house" style="font-size: 1rem;"></i> Volver al Inicio
-        </a>
     </div>
 </div>
 
@@ -173,7 +211,6 @@
     {% endif %}
 </article>
 
-<!-- SCRIPTS DE FUNCIONALIDAD -->
 <!-- SCRIPTS DE FUNCIONALIDAD ACTUALIZADOS -->
 <script>
 // 1. Filtrado dinámico por buscador

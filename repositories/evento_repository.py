@@ -49,7 +49,7 @@ def obtener_proximos_eventos(limite=5):
         with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("""
                 SELECT e.id, e.titulo, e.tipo_actividad, e.fecha, e.hora_inicio, e.hora_fin, 
-                       esp.nombre AS espacio, u.nombre AS responsable
+                      esp.nombre AS espacio, u.id AS responsable_id, u.nombre AS responsable
                 FROM eventos e
                 LEFT JOIN espacios esp ON e.espacio_id = esp.id
                 LEFT JOIN usuarios u ON e.responsable_id = u.id
@@ -78,6 +78,7 @@ def obtener_eventos_cartelera_publica(usuario_id=None):
                     e.enlace_virtual,
                     esp.nombre AS espacio, 
                     esp.capacidad AS capacidad_maxima, 
+                    u.id AS responsable_id, 
                     u.nombre AS responsable,
                     (SELECT COUNT(*) FROM inscripciones i WHERE i.evento_id = e.id) AS total_inscritos,
                     (SELECT COUNT(*) FROM inscripciones i WHERE i.evento_id = e.id AND i.usuario_id = %s) AS esta_inscrito
@@ -395,7 +396,7 @@ def obtener_mis_propuestas_estudiante(estudiante_id):
     try:
         with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("""
-                SELECT id, titulo, departamento, tipo_actividad, descripcion, estado, fecha_propuesta_evento 
+                SELECT id, titulo, departamento, tipo_actividad, descripcion, estado, fecha_propuesta 
                 FROM propuestas_estudiantes 
                 WHERE estudiante_id = %s 
                 ORDER BY id DESC;
@@ -457,15 +458,15 @@ def aceptar_y_agendar_propuesta(propuesta_id, fecha, hora_inicio, hora_fin, espa
             ))
 
             # B) Actualizar propuesta
+            # Actualizamos el estado de la propuesta. La tabla en la instancia actual
+            # usa la columna `fecha_propuesta` (timestamp). Evitamos tocar columnas
+            # que pueden no existir en esquemas diferentes.
             cursor.execute("""
                 UPDATE propuestas_estudiantes 
                 SET estado = 'aceptado', 
-                    fecha_propuesta_evento = %s, 
-                    hora_inicio = %s, 
-                    hora_fin = %s, 
-                    espacio_id = %s
+                    fecha_propuesta = %s
                 WHERE id = %s;
-            """, (fecha, hora_inicio, hora_fin, espacio_id, propuesta_id))
+            """, (fecha, propuesta_id))
 
         conexion.commit()
         return {"exito": True, "mensaje": "¡Propuesta aceptada y agendada exitosamente!"}
@@ -569,3 +570,24 @@ def obtener_evento_difusion(evento_id):
             return cursor.fetchone()
     finally:
         conexion.close()
+
+def guardar_material_db(evento_id, titulo, nombre_archivo):
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO materiales_repositorio (evento_id, titulo, nombre_archivo)
+                VALUES (%s, %s, %s);
+            """, (evento_id, titulo, nombre_archivo))
+        conexion.commit()
+    finally:
+        conexion.close()
+
+def obtener_materiales_repositorio(evento_id):
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute("SELECT * FROM materiales_repositorio WHERE evento_id = %s ORDER BY fecha_subida DESC;", (evento_id,))
+            return cursor.fetchall()
+    finally:
+        conexion.close()       

@@ -156,6 +156,16 @@
                             {{ ev.titulo }}
                         </h4>
 
+                        <!-- RESPONSABLE / PONENTE -->
+                        <div style="font-size: 0.9rem; color: #334155; margin-bottom: 10px; font-weight: 600; display:flex; align-items:center; gap:8px;">
+                            <i class="fa-solid fa-user-tie" style="color: #1d4ed8; width: 16px; text-align: center;"></i>
+                            {% if session.get('usuario_id') is defined and ev.responsable_id is defined and session.get('usuario_id') == ev.responsable_id %}
+                                <span><strong>Responsable:</strong> Tú</span>
+                            {% else %}
+                                <span><strong>Responsable:</strong> {{ ev.responsable or 'Sin asignar' }}</span>
+                            {% endif %}
+                        </div>
+
                         <!-- ALERTA DE CANCELACIÓN (SI EL EVENTO ESTÁ CANCELADO) -->
                         {% if est == 'cancelado' %}
                             <div style="margin-bottom: 14px; padding: 10px 12px; background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 6px; font-size: 0.85rem; color: #991b1b; font-weight: 700; display: flex; align-items: center; gap: 8px;">
@@ -225,7 +235,12 @@
                             <button type="button" class="btn" style="background: #e2e8f0; color: #475569; width: 100%; cursor: not-allowed;" disabled>
                                 <i class="fa-solid fa-circle-check" style="color: #166534;"></i> Ya estás inscrito
                             </button>
-                        
+
+                        {% elif session.get('usuario_id') is defined and ev.responsable_id is defined and session.get('usuario_id') == ev.responsable_id %}
+                            <button type="button" class="btn" style="background: #e2e8f0; color: #334155; width: 100%; cursor: not-allowed;" disabled>
+                                <i class="fa-solid fa-user-shield"></i> Eres el responsable
+                            </button>
+
                         {% elif total_insc >= cap_max %}
                             <button type="button" class="btn" style="background: #fee2e2; color: #991b1b; width: 100%; cursor: not-allowed;" disabled>
                                 <i class="fa-solid fa-ban"></i> Capacidad Agotada
