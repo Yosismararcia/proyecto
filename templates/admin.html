@@ -4,196 +4,335 @@
 
 {% block content %}
 <style>
-    /* Reducir separación vertical entre las secciones del Admin */
-    .admin-section, .card-section, .tabla-container, section {
+    /* 1. COMPACTAR ESPACIOS VERTICALES */
+    .admin-dashboard h2 {
+        margin-bottom: 4px !important;
+        font-size: 1.6rem;
+    }
+    .admin-dashboard h3 {
+        margin-top: 16px !important;
+        margin-bottom: 6px !important;
+        font-size: 1.25rem;
+    }
+    .admin-dashboard p {
         margin-bottom: 12px !important;
+        font-size: 0.95rem;
+        color: #4b5563;
+    }
+    hr {
+        margin: 18px 0 !important;
+        border: 0;
+        border-top: 1px solid var(--border-color, #e5e7eb);
+    }
+
+    /* 2. TABLAS Y CONTENEDOR RESPONSIVO */
+    .table-responsive-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Scroll suave en móviles */
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #ffffff;
+        margin-bottom: 12px;
+    }
+
+    table {
+        width: 100%;
+        min-width: 680px; /* Evita que las columnas se aplasten en pantallas chicas */
+        border-collapse: collapse;
+        font-size: 0.92rem;
+    }
+
+    table th {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+        letter-spacing: 0.5px;
+        background-color: #1f2937;
+        color: #ffffff;
+        text-align: left;
+    }
+
+    table td {
+        padding: 10px 12px;
+        font-size: 0.92rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    /* 3. BOTONES Y ETIQUETAS */
+    .btn-action, table button, table .button, table select {
+        font-size: 0.85rem !important;
+        padding: 5px 10px !important;
+        border-radius: 6px;
+    }
+
+    .badge-status {
+        padding: 4px 8px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        border-radius: 6px;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    /* 4. CONTENEDOR DE MÉTRICAS */
+    .metrics-container {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+    .metric-card {
+        flex: 1;
+        min-width: 260px;
+        border: 1px solid var(--border-color, #e5e7eb);
+        padding: 12px 16px;
+        border-radius: 8px;
+        background: #fafafa;
+    }
+
+    /* 📱 5. MEDIA QUERIES PARA PANTALLAS PEQUEÑAS / RESPONSIVIDAD */
+    @media (max-width: 768px) {
+        .admin-dashboard h2 {
+            font-size: 1.3rem !important;
+        }
+        .admin-dashboard h3 {
+            font-size: 1.1rem !important;
+        }
+        .metrics-container {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .metric-card {
+            width: 100%;
+        }
+        /* Indicador visual de scroll horizontal si la tabla es más ancha que la pantalla */
+        .table-responsive-wrapper {
+            box-shadow: inset -5px 0 8px -5px rgba(0,0,0,0.15);
+        }
+        table td, table th {
+            padding: 8px 10px;
+        }
     }
 </style>
 
-<h2>Panel de Control Administrativo 🛠</h2>
-<p>Gestión de reservas de espacios físicos y métricas de ocupación en tiempo real.</p>
+<div class="admin-dashboard">
+    <h2>Panel de Control Administrativo 🛠</h2>
+    <p>Gestión de reservas de espacios físicos y métricas de ocupación en tiempo real.</p>
 
-<!-- TARJETAS DE MÉTRICAS / RESUMEN -->
-<div style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
-    <div style="flex: 1; min-width: 280px; border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; background: #fafafa;">
-        <h3 style="margin-top: 0; color: #1f2937;">Salones Más Solicitados 🏫</h3>
-        <ul style="padding-left: 20px; margin-bottom: 0;">
-            {% for espacio in top_espacios %}
-                <li><strong>{{ espacio.nombre }}</strong>: {{ espacio.total }} solicitudes</li>
-            {% else %}
-                <li style="color: #888;">No hay datos de ocupación aún.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div style="flex: 1; min-width: 280px; border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; background: #fafafa;">
-        <h3 style="margin-top: 0; color: #1f2937;">Resumen del Sistema 📊</h3>
-        <ul style="padding-left: 20px; margin-bottom: 0;">
-            {% for conteo in conteo_estados %}
-                <li>
-                    <span style="text-transform: capitalize;"><strong>{{ conteo.estado }}</strong></span>: {{ conteo.total }} eventos
-                </li>
-            {% else %}
-                <li style="color: #888;">No hay eventos registrados en el sistema.</li>
-            {% endfor %}
-        </ul>
-    </div>
-</div>
-
-<hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 30px;">
-
-<h3>Seguimiento y Control de Solicitudes</h3>
-
-<section>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Evento / Solicitante</th>
-                    <th>Tipo</th>
-                    <th>Horario y Salón</th>
-                    <th>Estado</th>
-                    <th style="text-align: center;">Control de Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if solicitudes %}
-                    {% for sol in solicitudes %}
-                    <tr>
-                        <td>
-                            <strong>{{ sol.titulo }}</strong><br>
-                            <small style="color: #666;">Por: {{ sol.solicitado_por }}</small>
-                        </td>
-                        <td>{{ sol.tipo_actividad }}</td>
-                        <td>
-                            <strong>{{ sol.espacio }}</strong><br>
-                            <small>{{ sol.fecha }} ({{ sol.hora_inicio }} - {{ sol.hora_fin }})</small>
-                        </td>
-
-                        <!-- COLUMNA: ESTADO (ETIQUETAS VISUALES CORREGIDAS) -->
-                        <td>
-                            {% set est = sol.estado|lower %}
-                            {% if est == 'pendiente' %}
-                                <mark style="background-color: #fff3cd; color: #664d03; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; display: inline-block;">⏳ PENDIENTE</mark>
-                            {% elif est in ['aprobado', 'programado'] %}
-                                <mark style="background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; display: inline-block;">✅ {{ sol.estado | upper }}</mark>
-                            {% elif est == 'cancelado' %}
-                                <mark style="background-color: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; border: 1px solid #cbd5e1; display: inline-block;">🚫 CANCELADO</mark>
-                            {% elif est in ['completado', 'realizado'] %}
-                                <mark style="background-color: #cce5ff; color: #004085; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; display: inline-block;">☑️ REALIZADO</mark>
-                            {% else %}
-                                <mark style="background-color: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; display: inline-block;">❌ {{ sol.estado | upper }}</mark>
-                            {% endif %}
-                        </td>
-
-                        <!-- COLUMNA: CONTROL DE ESTADO (SELECT CORREGIDO CON CANCELADO) -->
-                        <td style="text-align: center;">
-                            <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;">
-                                <form action="/admin/actualizar-estado/{{ sol.id }}" method="POST" style="display: inline-flex; gap: 8px; margin: 0; padding: 0;">
-                                    <select name="estado" style="margin-bottom: 0; padding: 4px 8px; font-size: 0.85rem; border-radius: 6px;" required>
-                                        <option value="pendiente" {% if sol.estado|lower == 'pendiente' %}selected{% endif %}>⏳ Pendiente</option>
-                                        <option value="aprobado" {% if sol.estado|lower == 'aprobado' %}selected{% endif %}>✅ Aprobado</option>
-                                        <option value="programado" {% if sol.estado|lower == 'programado' %}selected{% endif %}>📅 Programado</option>
-                                        <option value="cancelado" {% if sol.estado|lower == 'cancelado' %}selected{% endif %}>🚫 Cancelado</option>
-                                        <option value="rechazado" {% if sol.estado|lower == 'rechazado' %}selected{% endif %}>❌ Rechazado</option>
-                                    </select>
-                                    <button type="submit" class="primary" style="padding: 4px 12px; margin-bottom: 0; font-size: 0.85rem; background-color: #0056b3; border-color: #0056b3;">
-                                        Guardar
-                                    </button>
-                                </form>
-                                
-                                <a href="{{ url_for('ver_inscritos_evento', evento_id=sol.id) }}" class="button" 
-                                   style="padding: 4px 10px; font-size: 0.85rem; background-color: #28a745; border-color: #28a745; color: white; margin-bottom: 0;"
-                                   title="Ver Participantes / Inscribir Manualmente">
-                                    👥
-                                </a>
-
-                                {% if sol.estado|lower in ['aprobado', 'programado'] %}
-                                    <a href="/evento/difundir/{{ sol.id }}" class="button" 
-                                       style="padding: 4px 10px; font-size: 0.85rem; background-color: #17a2b8; border-color: #17a2b8; color: white; margin-bottom: 0;"
-                                       title="Generar Ficha de Difusión">
-                                        📢
-                                    </a>
-                                {% endif %}
-
-                                <a href="/admin/editar-evento/{{ sol.id }}" class="button" 
-                                   style="padding: 4px 10px; font-size: 0.85rem; background-color: #ffc107; border-color: #ffc107; color: #000; margin-bottom: 0;"
-                                   title="Editar Evento">
-                                    ✏️
-                                </a>
-                                
-                                <form action="/admin/eliminar-evento/{{ sol.id }}" method="POST" style="margin: 0;" 
-                                      onsubmit="return confirm('¿Está completamente seguro de eliminar este evento de forma permanente? Esta acción no se puede deshacer.');">
-                                    <button type="submit" style="padding: 4px 10px; font-size: 0.85rem; background-color: #dc3545; border-color: #dc3545; color: white; margin-bottom: 0;" title="Eliminar Evento">
-                                        🗑️
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
+    <!-- TARJETAS DE MÉTRICAS / RESUMEN -->
+    <div class="metrics-container">
+        <div class="metric-card">
+            <h3 style="margin-top: 0; color: #1f2937;">Salones Más Solicitados 🏫</h3>
+            <ul style="padding-left: 20px; margin-bottom: 0; font-size: 0.92rem;">
+                {% for espacio in top_espacios %}
+                    <li><strong>{{ espacio.nombre }}</strong>: {{ espacio.total }} solicitudes</li>
                 {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: #888;">No hay solicitudes registradas en el sistema.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-</section>
-
-<hr style="border: 0; border-top: 1px solid var(--border-color); margin-top: 40px; margin-bottom: 30px;">
-
-<h3>💡 Ideas y Propuestas de Estudiantes</h3>
-<p>Revisión interna de iniciativas académicas o científicas sugeridas por el alumnado de la FaCyT-UC para su evaluación.</p>
-
-<section>
-    <div class="table-container">
-        <table>
-            <thead>
-            <tr>
-                <th>TÍTULO SUGERIDO</th>
-                <th>TIPO</th>
-                <th>JUSTIFICACIÓN / DESCRIPCIÓN</th>
-                <th>PROPUESTO POR</th>
-                <th>ESTADO</th>
-                <th>ACCIONES</th>
-            </tr>
-            </thead>
-            <tbody>
-                {% for prop in propuestas %}
-                <tr>
-                    <td class="fw-bold">{{ prop.titulo }}</td>
-                    <td><span class="badge bg-light text-dark border">{{ prop.tipo_actividad }}</span></td>
-                    <td>{{ prop.descripcion }}</td>
-                    <td><small>👤 {{ prop.estudiante }}</small></td>
-                    <td>
-                        {% if prop.estado == 'aceptado' %}
-                            <span class="badge bg-success">Aceptado</span>
-                        {% elif prop.estado == 'rechazado' %}
-                            <span class="badge bg-danger">Rechazado</span>
-                        {% else %}
-                            <span class="badge bg-warning text-dark">Pendiente</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if prop.estado == 'pendiente' %}
-                            <a href="{{ url_for('aprobar_propuesta', propuesta_id=prop.id) }}" class="btn btn-sm btn-success" title="Aprobar y Agendar">
-                                ✅ Aprobar
-                            </a>
-                            <form action="{{ url_for('rechazar_propuesta', propuesta_id=prop.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Desea rechazar esta propuesta?')" title="Rechazar">
-                                    ❌
-                                </button>
-                            </form>
-                        {% else %}
-                            <small class="text-muted">Procesado</small>
-                        {% endif %}
-                    </td>
-                </tr>
+                    <li style="color: #888;">No hay datos de ocupación aún.</li>
                 {% endfor %}
-            </tbody>           
-        </table>
+            </ul>
+        </div>
+
+        <div class="metric-card">
+            <h3 style="margin-top: 0; color: #1f2937;">Resumen del Sistema 📊</h3>
+            <ul style="padding-left: 20px; margin-bottom: 0; font-size: 0.92rem;">
+                {% for conteo in conteo_estados %}
+                    <li>
+                        <span style="text-transform: capitalize;"><strong>{{ conteo.estado }}</strong></span>: {{ conteo.total }} eventos
+                    </li>
+                {% else %}
+                    <li style="color: #888;">No hay eventos registrados en el sistema.</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
-</section>
+
+    <hr>
+
+    <h3>Seguimiento y Control de Solicitudes</h3>
+
+    <section>
+        <div class="table-responsive-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Evento / Solicitante</th>
+                        <th>Tipo</th>
+                        <th>Horario y Salón</th>
+                        <th>Estado</th>
+                        <th style="text-align: center;">Control de Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if solicitudes %}
+                        {% for sol in solicitudes %}
+                        <tr>
+                            <td>
+                                <strong>{{ sol.titulo }}</strong><br>
+                                <span style="color: #666; font-size: 0.85rem;">Por: {{ sol.solicitado_por }}</span>
+                            </td>
+                            <td><strong>{{ sol.tipo_actividad }}</strong></td>
+                            <td>
+                                <strong>{{ sol.espacio }}</strong><br>
+                                <span style="font-size: 0.85rem; color: #555;">{{ sol.fecha }} ({{ sol.hora_inicio }} - {{ sol.hora_fin }})</span>
+                            </td>
+
+                            <!-- COLUMNA: ESTADO -->
+                            <td>
+                                {% set est = sol.estado|lower %}
+                                {% if est == 'pendiente' %}
+                                    <span class="badge-status" style="background-color: #fff3cd; color: #664d03;">⏳ PENDIENTE</span>
+                                {% elif est in ['aprobado', 'programado'] %}
+                                    <span class="badge-status" style="background-color: #d4edda; color: #155724;">✅ {{ sol.estado | upper }}</span>
+                                {% elif est == 'cancelado' %}
+                                    <span class="badge-status" style="background-color: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">🚫 CANCELADO</span>
+                                {% elif est in ['completado', 'realizado'] %}
+                                    <span class="badge-status" style="background-color: #cce5ff; color: #004085;">☑️ REALIZADO</span>
+                                {% else %}
+                                    <span class="badge-status" style="background-color: #f8d7da; color: #721c24;">❌ {{ sol.estado | upper }}</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- COLUMNA: CONTROL DE ESTADO -->
+                            <td style="text-align: center;">
+                                <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                                    <form action="/admin/actualizar-estado/{{ sol.id }}" method="POST" style="display: inline-flex; gap: 6px; margin: 0;">
+                                        <select name="estado" style="margin-bottom: 0;" required>
+                                            <option value="pendiente" {% if sol.estado|lower == 'pendiente' %}selected{% endif %}>⏳ Pendiente</option>
+                                            <option value="aprobado" {% if sol.estado|lower == 'aprobado' %}selected{% endif %}>✅ Aprobado</option>
+                                            <option value="programado" {% if sol.estado|lower == 'programado' %}selected{% endif %}>📅 Programado</option>
+                                            <option value="cancelado" {% if sol.estado|lower == 'cancelado' %}selected{% endif %}>🚫 Cancelado</option>
+                                            <option value="rechazado" {% if sol.estado|lower == 'rechazado' %}selected{% endif %}>❌ Rechazado</option>
+                                        </select>
+                                        <button type="submit" class="primary" style="background-color: #0056b3; border-color: #0056b3; color: white;">
+                                            Guardar
+                                        </button>
+                                    </form>
+                                    
+                                    <a href="{{ url_for('ver_inscritos_evento', evento_id=sol.id) }}" class="button" 
+                                       style="background-color: #28a745; border-color: #28a745; color: white; margin-bottom: 0;"
+                                       title="Ver Participantes / Inscribir Manualmente">
+                                        👥
+                                    </a>
+
+                                    {% if sol.estado|lower in ['aprobado', 'programado'] %}
+                                        <a href="/evento/difundir/{{ sol.id }}" class="button" 
+                                           style="background-color: #17a2b8; border-color: #17a2b8; color: white; margin-bottom: 0;"
+                                           title="Generar Ficha de Difusión">
+                                            📢
+                                        </a>
+                                    {% endif %}
+
+                                    <a href="/admin/editar-evento/{{ sol.id }}" class="button" 
+                                       style="background-color: #ffc107; border-color: #ffc107; color: #000; margin-bottom: 0;"
+                                       title="Editar Evento">
+                                        ✏️
+                                    </a>
+                                    
+                                    <form action="/admin/eliminar-evento/{{ sol.id }}" method="POST" style="margin: 0;" 
+                                          onsubmit="return confirm('¿Está completamente seguro de eliminar este evento de forma permanente?');">
+                                        <button type="submit" style="background-color: #dc3545; border-color: #dc3545; color: white; margin-bottom: 0;" title="Eliminar Evento">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #888; padding: 16px !important;">No hay solicitudes registradas en el sistema.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <hr>
+
+    <h3>💡 Ideas y Propuestas de Estudiantes</h3>
+    <p>Revisión interna de iniciativas académicas o científicas sugeridas por el alumnado de la FaCyT-UC para su evaluación.</p>
+
+    <section>
+        <div class="table-responsive-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título Sugerido</th>
+                        <th>Tipo</th>
+                        <th>Justificación / Descripción</th>
+                        <th>Propuesto Por</th>
+                        <th>Estado</th>
+                        <th style="text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if propuestas %}
+                        {% for prop in propuestas %}
+                        {% set estado_prop = (prop.estado if prop.estado is defined else prop.get('estado', '')) | string | lower | trim %}
+                        {% set prop_id = prop.id if prop.id is defined else prop.get('id', '') %}
+                        
+                        <tr>
+                            <td><strong>{{ prop.titulo if prop.titulo is defined else prop.get('titulo', '') }}</strong></td>
+                            <td><span class="badge-status" style="background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">{{ prop.tipo_actividad if prop.tipo_actividad is defined else prop.get('tipo_actividad', '') }}</span></td>
+                            <td style="max-width: 250px; color: #4b5563; font-size: 0.88rem;">
+                                {{ prop.descripcion if prop.descripcion is defined else prop.get('descripcion', '') }}
+                            </td>
+                            <td>👤 <strong>{{ prop.estudiante_nombre if prop.estudiante_nombre is defined else prop.get('estudiante_nombre', prop.get('propuesto_por', '')) }}</strong></td>
+                            <td>
+                                {% if estado_prop in ['pendiente', 'en_revision', 'en revisión'] %}
+                                    <span class="badge-status" style="background-color: #fff3cd; color: #664d03;">⏳ PENDIENTE</span>
+                                {% elif estado_prop in ['aprobado', 'aceptado', 'programado'] %}
+                                    <span class="badge-status" style="background-color: #d4edda; color: #155724;">✅ APROBADO</span>
+                                {% else %}
+                                    <span class="badge-status" style="background-color: #f8d7da; color: #721c24;">❌ RECHAZADO</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- COLUMNA DE ACCIONES -->
+                            <td style="text-align: center;">
+                                {% if estado_prop in ['pendiente', 'en_revision', 'en revisión'] %}
+                                    <div style="display: flex; justify-content: center; gap: 6px;">
+                                        <a href="{{ url_for('aprobar_propuesta', propuesta_id=prop_id) }}" 
+                                           class="button" 
+                                           style="background-color: #28a745; border-color: #28a745; color: white; margin-bottom: 0;" 
+                                           title="Aprobar y Agendar">
+                                            ✓ Procesar
+                                        </a>
+
+                                        <form action="{{ url_for('rechazar_propuesta', propuesta_id=prop_id) }}" 
+                                              method="POST" 
+                                              style="display: inline; margin: 0;" 
+                                              onsubmit="return confirm('¿Seguro que deseas rechazar esta propuesta?');">
+                                            <button type="submit" style="background-color: #dc3545; border-color: #dc3545; color: white; margin-bottom: 0;" title="Rechazar">
+                                                ✗ Rechazar
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <form action="{{ url_for('eliminar_propuesta', propuesta_id=prop_id) }}" 
+                                          method="POST" 
+                                          style="display: inline-block; margin: 0;" 
+                                          onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta propuesta permanentemente?');">
+                                        <button type="submit" style="background-color: #dc3545; border-color: #dc3545; color: white; margin-bottom: 0;" title="Eliminar propuesta">
+                                            🗑️ Eliminar
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #888; padding: 16px !important;">
+                                No hay propuestas enviadas por estudiantes actualmente.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
 {% endblock %}

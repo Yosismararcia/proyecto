@@ -3,7 +3,7 @@ from database import obtener_conexion
 from core.security import clean_input_strict, clean_html_entities
 
 
-# --- METRICAS Y DASHBOARD ---
+# --- MÉTRICAS Y DASHBOARD ---
 
 def obtener_metricas_dashboard():
     conexion = obtener_conexion()
@@ -356,11 +356,35 @@ def obtener_propuestas_totales_admin():
     try:
         with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("""
-                SELECT p.id, p.titulo, p.tipo_actividad, p.descripcion, u.nombre AS estudiante
+                SELECT 
+                    p.id, 
+                    p.titulo, 
+                    p.tipo_actividad, 
+                    COALESCE(p.departamento, 'General') AS departamento,
+                    p.descripcion, 
+                    LOWER(TRIM(p.estado)) AS estado,
+                    u.nombre AS estudiante,
+                    u.nombre AS estudiante_nombre
                 FROM propuestas_estudiantes p
-                JOIN usuarios u ON p.estudiante_id = u.id ORDER BY p.id DESC;
+                JOIN usuarios u ON p.estudiante_id = u.id 
+                ORDER BY p.id DESC;
             """)
             return cursor.fetchall()
+    finally:
+        conexion.close()
+
+
+def eliminar_propuesta_estudiante(propuesta_id):
+    """Elimina permanentemente una propuesta de estudiante por su ID."""
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute("DELETE FROM propuestas_estudiantes WHERE id = %s;", (propuesta_id,))
+        conexion.commit()
+        return True
+    except pymysql.MySQLError as e:
+        print(f"❌ Error al eliminar propuesta: {e}")
+        return False
     finally:
         conexion.close()
 
@@ -470,16 +494,14 @@ def editar_propuesta_estudiante(propuesta_id, estudiante_id, titulo, departament
             """, (titulo_limpio, departamento_limpio, tipo_actividad, descripcion_segura, propuesta_id, estudiante_id))
             
         conexion.commit()
-        
-        # En MySQL/MariaDB la consulta se ejecuta con éxito aunque no haya cambios de texto.
         return True
 
     except Exception as e:
-        # Imprime el detalle exacto en la terminal donde corre Flask
         print(f"❌ [ERROR DB] Falló editar_propuesta_estudiante: {e}")
         return False
     finally:
         conexion.close()
+
 
 # --- ESTADÍSTICAS Y AUXILIARES ---
 

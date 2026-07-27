@@ -1,71 +1,45 @@
 import pymysql
 from database import obtener_conexion
 
-
 def registrar_inscripcion_segura(evento_id, usuario_id):
-    """
-    Registra a un usuario manejando bloqueo concurrente (FOR UPDATE)
-    y control transaccional estricto. Bloquea inscripciones si el evento está cancelado.
-    """
     conexion = obtener_conexion()
-    
     try:
-        conexion.begin()
-        
         with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
-            # 1. Bloqueo pesimista sobre el evento (incluye e.estado)
+            # 1. Verificar capacidad máxima y total de inscritos actuales
             cursor.execute("""
-                SELECT e.id, e.estado, esp.capacidad 
+                SELECT 
+                    e.estado,
+                    esp.capacidad AS capacidad_maxima,
+                    (SELECT COUNT(*) FROM inscripciones WHERE evento_id = %s) AS total_inscritos,
+                    (SELECT COUNT(*) FROM inscripciones WHERE evento_id = %s AND usuario_id = %s) AS ya_inscrito
                 FROM eventos e
-                INNER JOIN espacios esp ON e.espacio_id = esp.id
-                WHERE e.id = %s FOR UPDATE;
-            """, (evento_id,))
-            evento = cursor.fetchone()
+                LEFT JOIN espacios esp ON e.espacio_id = esp.id
+                WHERE e.id = %s;
+            """, (evento_id, evento_id, usuario_id, evento_id))
             
-            if not evento:
-                conexion.rollback()
-                return {"status": "error", "message": "El evento seleccionado no existe."}
-            
-            # 1.5. VALIDACIÓN DE ESTADO: Bloqueo de seguridad para eventos cancelados
-            estado_actual = str(evento.get('estado', '')).strip().lower()
-            if estado_actual == 'cancelado':
-                conexion.rollback()
-                return {
-                    "status": "warning", 
-                    "message": "🚫 No es posible inscribirse a este evento porque ha sido cancelado por la administración."
-                }
-                
-            # 2. Contar inscritos activos en el momento
-            cursor.execute("SELECT COUNT(*) as actuales FROM inscripciones WHERE evento_id = %s;", (evento_id,))
-            res_conteo = cursor.fetchone()
-            total_inscritos = res_conteo['actuales'] if res_conteo else 0
-            capacidad_maxima = evento.get('capacidad', 0)
-            
-            if capacidad_maxima and total_inscritos >= capacidad_maxima:
-                conexion.rollback()
-                return {"status": "error", "message": "Los cupos para este evento se han agotado."}
-                
-            # 3. Validar duplicados
-            cursor.execute(
-                "SELECT id FROM inscripciones WHERE evento_id = %s AND usuario_id = %s;", 
-                (evento_id, usuario_id)
-            )
-            if cursor.fetchone():
-                conexion.rollback()
-                return {"status": "warning", "message": "Ya te encuentras registrado en este evento."}
-                
-            # 4. Insertar inscripción
-            cursor.execute(
-                "INSERT INTO inscripciones (evento_id, usuario_id) VALUES (%s, %s);",
-                (evento_id, usuario_id)
-            )
-            
+            datos = cursor.fetchone()
+
+            if not datos:
+                return {"status": "error", "message": "El evento no existe."}
+
+            if datos['ya_inscrito'] > 0:
+                return {"status": "warning", "message": "Ya te encuentras inscrito en este evento."}
+
+            if datos['total_inscritos'] >= datos['capacidad_maxima']:
+                return {"status": "error", "message": "🚫 Capacidad agotada. No quedan cupos disponibles para este evento."}
+
+            # 2. Registrar la inscripción
+            cursor.execute("""
+                INSERT INTO inscripciones (evento_id, usuario_id, fecha_inscripcion)
+                VALUES (%s, %s, NOW());
+            """, (evento_id, usuario_id))
+
         conexion.commit()
-        return {"status": "success", "message": "🎉 ¡Inscripción realizada con éxito! Tu cupo ha sido reservado."}
-        
+        return {"status": "success", "message": "¡Te has inscrito exitosamente al evento!"}
+
     except Exception as e:
         conexion.rollback()
-        return {"status": "error", "message": f"Falla en base de datos: {str(e)}"}
+        return {"status": "error", "message": f"Error al procesar la inscripción: {str(e)}"}
     finally:
         conexion.close()
 
@@ -103,3 +77,17 @@ def obtener_inscritos_por_evento(evento_id):
             return cursor.fetchall()
     finally:
         conexion.close()
+
+def eliminar_propuesta_estudiante(propuesta_id):
+    """Elimina permanentemente una propuesta de estudiante por su ID."""
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute("DELETE FROM propuestas_estudiantes WHERE id = %s;", (propuesta_id,))
+        conexion.commit()
+        return True
+    except pymysql.MySQLError as e:
+        print(f"❌ Error al eliminar propuesta: {e}")
+        return False
+    finally:
+        conexion.close()        

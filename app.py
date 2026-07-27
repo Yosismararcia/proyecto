@@ -9,6 +9,11 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from werkzeug.security import generate_password_hash, check_password_hash
+import csv
+import io
+import os
+from flask import render_template, redirect, url_for, flash, session, request, make_response
+from werkzeug.utils import secure_filename
 
 # 1. Importación de Repositorios
 import repositories.evento_repository as evento_repo
@@ -19,13 +24,11 @@ from repositories.inscripcion_repository import (
     obtener_inscritos_por_evento  # 👈 Importar aquí
 )
 from repositories.evento_repository import (
-    obtener_propuesta_por_id,
-    aceptar_y_agendar_propuesta,
-    obtener_lista_espacios_formulario,
-    rechazar_propuesta_estudiante,
-    editar_propuesta_estudiante
-    )
-
+    obtener_metricas_dashboard,
+    obtener_solicitudes_totales_admin,
+    obtener_propuestas_totales_admin,
+    eliminar_propuesta_estudiante  # <--- Agrega la nueva función aquí
+)
 # 2. Importación de Módulos Core y Seguridad
 from core.security import (
     hash_password, 
@@ -65,10 +68,6 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY', 'clave_secreta_super_segura_facyt
 
 # Instancia del Serializador para tokens temporales de recuperación
 serializer = obtener_serializer(app.secret_key)
-
-
-# --- RUTA 1: INICIO (DASHBOARD) ---
-@app.route('/')
 # --- RUTA 1: INICIO (DASHBOARD) ---
 @app.route('/')
 def inicio():
@@ -1038,71 +1037,26 @@ def gestionar_postulacion(postulacion_id, accion):
     return redirect(url_for('detalle_evento', evento_id=evento_id))
 
 # --- RUTAS DE ADMINISTRACIÓN DE PROPUESTAS ---
+# ==========================================
+# GESTIÓN DE PROPUESTAS DE ESTUDIANTES
+# ==========================================
 
-@app.route('/admin/propuesta/aprobar/<int:propuesta_id>', methods=['GET', 'POST'])
-def aprobar_propuesta(propuesta_id):
-    rol_actual = str(session.get('usuario_rol', '')).strip().upper()
-    if rol_actual not in ['ADMINISTRATIVO', 'ADMINISTRADOR', 'ADMIN']:
-        flash('Acceso no autorizado.', 'error')
-        return redirect(url_for('inicio'))
-
-    propuesta = obtener_propuesta_por_id(propuesta_id)
-
-    if not propuesta:
-        flash('La propuesta no existe.', 'error')
-        return redirect(url_for('admin'))
-
-    if request.method == 'POST':
-        fecha = request.form.get('fecha')
-        hora_inicio = request.form.get('hora_inicio')
-        hora_fin = request.form.get('hora_fin')
-        espacio_id = request.form.get('espacio_id')
-
-        res = aceptar_y_agendar_propuesta(propuesta_id, fecha, hora_inicio, hora_fin, espacio_id)
-        if res['exito']:
-            flash(res['mensaje'], 'success')
-            return redirect(url_for('admin'))
-        else:
-            flash(res['mensaje'], 'error')
-
-    espacios = obtener_lista_espacios_formulario()
-    return render_template('aprobar_propuesta_form.html', propuesta=propuesta, espacios=espacios)
-
-
-@app.route('/admin/propuesta/rechazar/<int:propuesta_id>', methods=['POST'])
-def rechazar_propuesta(propuesta_id):
-    rol_actual = str(session.get('usuario_rol', '')).strip().upper()
-    if rol_actual not in ['ADMINISTRATIVO', 'ADMINISTRADOR', 'ADMIN']:
-        flash('Acceso no autorizado.', 'error')
-        return redirect(url_for('inicio'))
-
-    if rechazar_propuesta_estudiante(propuesta_id):
-        flash('La propuesta ha sido rechazada.', 'info')
-    else:
-        flash('No se pudo procesar la solicitud.', 'error')
-    return redirect(url_for('admin'))
-
-
-# --- RUTA PARA QUE EL ESTUDIANTE EDITE SU PROPUESTA ---
-
-# --- EDITAR PROPUESTA DE ESTUDIANTE ---
-@app.route('/propuesta/editar/<int:propuesta_id>', methods=['GET', 'POST'])
+# 1. EDITAR PROPUESTA (ESTUDIANTE)
+@app.route('/editar_propuesta/<int:propuesta_id>', methods=['GET', 'POST'])
 @requerir_rol(['estudiante'])
 def editar_propuesta(propuesta_id):
-    usuario_id = session.get('usuario_id')
-
-    # Obtener la propuesta
     propuesta = evento_repo.obtener_propuesta_por_id(propuesta_id)
-
-    # Validar existencia y propiedad
-    if not propuesta or propuesta.get('estudiante_id') != usuario_id:
-        flash("❌ No tienes permisos para editar esta propuesta o no existe.", "error")
+    if not propuesta:
+        flash("❌ La propuesta solicitada no existe.", "error")
+        return redirect(url_for('mis_propuestas'))
+        
+    # Verificar pertenencia del estudiante y que siga en estado pendiente
+    if propuesta['estudiante_id'] != session['usuario_id']:
+        flash("⛔ No tienes permisos para editar esta propuesta.", "error")
         return redirect(url_for('mis_propuestas'))
 
-    # Validar estado (solo editable si está en revisión / pendiente)
-    estado = str(propuesta.get('estado', '')).lower()
-    if estado not in ['pendiente', 'en revision', 'en revisión']:
-        flash("⚠️ No puedes editar propuestas que ya han sido evaluadas.", "error")
+    if str(propuesta.get('estado', '')).lower() not in ['pendiente', 'en revision', 'en_revision']:
+        flash("⚠️ Solo puedes editar propuestas que se encuentren en estado pendiente.", "warning")
         return redirect(url_for('mis_propuestas'))
 
     if request.method == 'POST':
@@ -1111,15 +1065,9 @@ def editar_propuesta(propuesta_id):
         tipo_actividad = request.form.get('tipo_actividad')
         descripcion = request.form.get('descripcion')
 
-        # Validar campos obligatorios
-        if not all([titulo, tipo_actividad, descripcion]):
-            flash("❌ Por favor complete todos los campos requeridos.", "error")
-            return redirect(url_for('editar_propuesta', propuesta_id=propuesta_id))
-
-        # Actualización en repositorio
         exito = evento_repo.editar_propuesta_estudiante(
             propuesta_id=propuesta_id,
-            estudiante_id=usuario_id,
+            estudiante_id=session['usuario_id'],
             titulo=titulo,
             departamento=departamento,
             tipo_actividad=tipo_actividad,
@@ -1127,13 +1075,69 @@ def editar_propuesta(propuesta_id):
         )
 
         if exito:
-            flash("✏️ Propuesta actualizada correctamente.", "success")
+            flash("✏️ ¡Propuesta actualizada con éxito!", "success")
             return redirect(url_for('mis_propuestas'))
         else:
-            flash("❌ Error al actualizar la propuesta.", "error")
-            return redirect(url_for('editar_propuesta', propuesta_id=propuesta_id))
+            flash("❌ No se pudieron guardar los cambios en la propuesta.", "error")
 
     return render_template('editar_propuesta.html', propuesta=propuesta)
+
+
+# 2. APROBAR Y AGENDAR PROPUESTA (ADMINISTRATIVO)
+@app.route('/admin/aprobar-propuesta/<int:propuesta_id>', methods=['GET', 'POST'])
+@requerir_rol(['administrativo'])
+def aprobar_propuesta(propuesta_id):
+    propuesta = evento_repo.obtener_propuesta_por_id(propuesta_id)
+    if not propuesta:
+        flash("❌ La propuesta no existe.", "error")
+        return redirect(url_for('admin'))
+
+    if request.method == 'POST':
+        espacio_id = request.form.get('espacio_id')
+        fecha = request.form.get('fecha')
+        hora_inicio = request.form.get('hora_inicio')
+        hora_fin = request.form.get('hora_fin')
+
+        if not all([espacio_id, fecha, hora_inicio, hora_fin]):
+            flash("❌ Por favor asigne el espacio, la fecha y el horario completo.", "error")
+            return redirect(url_for('aprobar_propuesta', propuesta_id=propuesta_id))
+
+        resultado = evento_repo.aceptar_y_agendar_propuesta(
+            propuesta_id=propuesta_id,
+            fecha=fecha,
+            hora_inicio=hora_inicio,
+            hora_fin=hora_fin,
+            espacio_id=espacio_id
+        )
+
+        if resultado.get('exito'):
+            flash("🎉 " + resultado['mensaje'], "success")
+            return redirect(url_for('admin'))
+        else:
+            flash(resultado.get('mensaje', 'Error al procesar la aprobación.'), "error")
+
+    espacios = evento_repo.obtener_lista_espacios_formulario()
+    return render_template('aprobar_propuesta_form.html', propuesta=propuesta, espacios=espacios)
+
+
+# 3. RECHAZAR PROPUESTA (ADMINISTRATIVO)
+@app.route('/admin/rechazar-propuesta/<int:propuesta_id>', methods=['POST'])
+@requerir_rol(['administrativo'])
+def rechazar_propuesta(propuesta_id):
+    if evento_repo.rechazar_propuesta_estudiante(propuesta_id):
+        flash("🚫 La propuesta ha sido rechazada correctamente.", "info")
+    else:
+        flash("❌ Ocurrió un error al intentar rechazar la propuesta.", "error")
+    return redirect(url_for('admin'))
+
+@app.route('/admin/propuesta/eliminar/<int:propuesta_id>', methods=['POST'])
+def eliminar_propuesta(propuesta_id):
+    if eliminar_propuesta_estudiante(propuesta_id):
+        flash("Propuesta eliminada correctamente.", "success")
+    else:
+        flash("No se pudo eliminar la propuesta.", "danger")
+        
+    return redirect(url_for('admin'))  # Ajusta al nombre de tu vista admin
 
 # --- SALIDA DEL SISTEMA ---
 @app.route('/logout')
