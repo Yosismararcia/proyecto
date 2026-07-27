@@ -38,9 +38,15 @@
 
     table {
         width: 100%;
-        min-width: 680px; /* Evita que las columnas se aplasten en pantallas chicas */
+        min-width: auto;
         border-collapse: collapse;
         font-size: 0.92rem;
+        table-layout: auto;
+    }
+
+    table th, table td {
+        word-break: break-word;
+        white-space: normal;
     }
 
     table th {
@@ -106,12 +112,20 @@
         .metric-card {
             width: 100%;
         }
-        /* Indicador visual de scroll horizontal si la tabla es más ancha que la pantalla */
         .table-responsive-wrapper {
             box-shadow: inset -5px 0 8px -5px rgba(0,0,0,0.15);
         }
+        table {
+            min-width: 100%;
+        }
         table td, table th {
             padding: 8px 10px;
+            white-space: normal;
+        }
+        .acciones-col {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
         }
     }
 </style>
