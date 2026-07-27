@@ -149,8 +149,8 @@
                             📋 Ver Postulantes ({{ (tarea.postulaciones|length) if tarea.postulaciones else 0 }})
                         </summary>
                         {% if tarea.postulaciones %}
-                            <div style="overflow-x: auto; margin-top: 12px;">
-                                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                            <div class="table-responsive" style="margin-top: 12px;">
+                                <table style="border-collapse: collapse; font-size: 0.85rem;">
                                     <thead>
                                         <tr style="background: #0f172a; color: #ffffff;">
                                             <th style="padding: 8px 12px; text-align: left;">Estudiante</th>
@@ -219,9 +219,38 @@
         Resumen (Abstract):
     </p>
     <div style="background: #f8fafc; padding: 16px; border-left: 4px solid #1d4ed8; border-radius: 6px; font-size: 0.92rem; color: #334155; line-height: 1.5; font-weight: 500; margin-bottom: 18px;">
-        {{ evento.abstract or 'El resumen científico de este evento no ha sido publicado todavía.' }}
+        {{ evento.abstract or evento.resumen or evento.descripcion or 'El resumen científico de este evento no ha sido publicado todavía.' }}
     </div>
 
+    <div style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+        <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+            <h4 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-folder-open" style="color: #1d4ed8;"></i> Repositorio de Materiales
+            </h4>
+        </div>
+        <p style="font-size: 0.9rem; color: #475569; margin-bottom: 18px;">
+            Aquí encontrarás los archivos que se han cargado para este evento. Todos los participantes pueden descargar el material si está disponible.
+        </p>
+        <ul style="list-style: none; padding-left: 0; margin: 0; display: grid; gap: 12px;">
+            {% if materiales %}
+                {% for mat in materiales %}
+                    <li style="padding: 14px 16px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                        <div>
+                            <div style="font-weight: 800; color: #0f172a;">{{ mat.titulo }}</div>
+                            <div style="font-size: 0.85rem; color: #475569;">{{ mat.nombre_archivo }}</div>
+                        </div>
+                        <a href="{{ url_for('static', filename='uploads/repositorio/' ~ mat.nombre_archivo) }}" download class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.85rem;">
+                            ⬇️ Descargar
+                        </a>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li style="color: #64748b; font-size: 0.95rem; padding: 16px 12px; background: #f1f5f9; border-radius: 8px;">
+                    No hay archivos cargados en el repositorio para este evento.
+                </li>
+            {% endif %}
+        </ul>
+    </div>
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         {% if evento.paper_pdf_url %}
             <a href="{{ evento.paper_pdf_url }}" target="_blank" class="btn btn-secondary">
@@ -241,6 +270,19 @@
         </a>
         {% endif %}
     </div>
+
+    {% if puede_subir_material %}
+    <div style="margin-top: 20px; padding: 18px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+        <h4 style="margin-top: 0; font-size: 1rem; color: #1e293b;">📤 Subir Material al Repositorio</h4>
+        <form action="{{ url_for('subir_material_repositorio', evento_id=evento.id) }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <input type="text" name="titulo_material" placeholder="Título o descripción breve del archivo" required style="flex: 1; min-width: 200px; padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc;">
+            <input type="file" name="archivo" required style="font-size: 0.88rem;">
+            <button type="submit" style="background-color: #0f172a; color: white; padding: 6px 16px; border-radius: 6px; border: none; cursor: pointer;">
+                Subir Archivo
+            </button>
+        </form>
+    </div>
+    {% endif %}
 </div>
 
 <!-- ========================================================= -->

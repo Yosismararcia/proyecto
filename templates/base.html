@@ -147,9 +147,11 @@
         }
 
         /* === TABLAS CON SCROLL RESPONSIVO === */
-        .table-container, .table-responsive {
+        .table-container, .table-responsive, .table-responsive-wrapper {
             width: 100%;
+            max-height: 54vh;
             overflow-x: auto;
+            overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             border: 1px solid #94a3b8;
             border-radius: 10px;
@@ -158,11 +160,28 @@
             margin-bottom: 16px;
         }
 
+        .table-container table,
+        .table-responsive table,
+        .table-responsive-wrapper table,
         table, .custom-table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 550px;
+            min-width: 100%;
+        }
+
+        .table-container::-webkit-scrollbar,
+        .table-responsive::-webkit-scrollbar,
+        .table-responsive-wrapper::-webkit-scrollbar {
+            height: 7px;
+            width: 7px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb,
+        .table-responsive::-webkit-scrollbar-thumb,
+        .table-responsive-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(15, 23, 42, 0.35);
+            border-radius: 999px;
         }
 
         th {
@@ -183,10 +202,20 @@
             color: #1e293b;
             border-bottom: 1px solid #e2e8f0;
             vertical-align: middle;
+            word-break: break-word;
+        }
+
+        th, td {
+            word-break: break-word;
         }
 
         tr:nth-child(even) td { background-color: #f8fafc; }
         tr:hover td { background-color: #f1f5f9; }
+
+        img, video, iframe {
+            max-width: 100%;
+            height: auto;
+        }
 
         /* === FORMULARIOS === */
         label {
@@ -288,6 +317,12 @@
         footer.main-footer strong { color: #ffffff; }
 
         /* === MOVIL === */
+        @media (max-width: 900px) {
+            main.main-wrapper.con-sidebar {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 650px) {
             header.main-header {
                 justify-content: center;
@@ -311,6 +346,28 @@
             .btn {
                 width: 100%;
                 margin-bottom: 4px;
+            }
+
+            body {
+                font-size: 14px;
+            }
+
+            .card-title, .sidebar-title, .card-header {
+                font-size: 1rem;
+            }
+
+            .table-container, .table-responsive, .table-responsive-wrapper {
+                margin-top: 8px;
+                margin-bottom: 12px;
+            }
+
+            th, td {
+                padding: 10px 12px;
+                font-size: 0.78rem;
+            }
+
+            .sidebar-card {
+                width: 100%;
             }
         }
     </style>
