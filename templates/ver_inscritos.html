@@ -23,52 +23,6 @@
     <a href="{{ url_for('exportar_inscritos_csv', evento_id=evento.id) }}" class="button" style="background-color: #28a745; color: white; border-radius: 6px; padding: 8px 16px; text-decoration: none;">
         📊 Exportar a Excel (CSV)
     </a>
-
-    <!-- SECCIÓN: REPOSITORIO CIENTÍFICO E INFORMACIÓN -->
-    <div class="card shadow-sm border-0 rounded-3 my-4 p-4" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;">
-        <h3 style="color: #1f2937; display: flex; align-items: center; gap: 8px; margin-top: 0;">
-            💾 Repositorio Científico e Información del Evento
-        </h3>
-
-        <div style="margin-bottom: 20px;">
-            <strong style="font-size: 0.9rem; color: #374151;">RESUMEN (ABSTRACT):</strong>
-            <p style="background: #f9fafb; border-left: 4px solid #2563eb; padding: 12px; border-radius: 4px; color: #4b5563; margin-top: 6px;">
-                {{ evento.descripcion if evento.descripcion else 'El resumen científico de este evento no ha sido publicado todavía.' }}
-            </p>
-        </div>
-
-        <!-- MATERIALES PUBLICADOS -->
-        <div style="margin-bottom: 20px;">
-            <strong style="font-size: 0.9rem; color: #374151;">MATERIALES Y DOCUMENTOS ADJUNTOS:</strong>
-            <ul style="list-style: none; padding-left: 0; margin-top: 8px;">
-                {% for mat in materiales %}
-                    <li style="padding: 8px 12px; background: #f3f4f6; margin-bottom: 6px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                        <span>📄 <strong>{{ mat.titulo }}</strong> ({{ mat.nombre_archivo }})</span>
-                        <a href="{{ url_for('static', filename='uploads/repositorio/' ~ mat.nombre_archivo) }}" download class="btn btn-sm btn-outline-primary" style="padding: 4px 10px; font-size: 0.85rem;">
-                            ⬇️ Descargar
-                        </a>
-                    </li>
-                {% else %}
-                    <li style="color: #888; font-size: 0.9rem;">No hay archivos o guías adjuntas en el repositorio.</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <!-- FORMULARIO PARA SUBIR MATERIAL (Visibilidad exclusiva para el Profesor a Cargo o Admin) -->
-        {% if puede_subir_material %}
-        <hr style="border-top: 1px solid #e5e7eb; margin: 15px 0;">
-        <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
-            <h4 style="margin-top: 0; font-size: 1rem; color: #1e293b;">📤 Subir Material al Repositorio</h4>
-            <form action="{{ url_for('subir_material_repositorio', evento_id=evento.id) }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <input type="text" name="titulo_material" placeholder="Título o descripción breve del archivo" required style="flex: 1; min-width: 200px; padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc;">
-                <input type="file" name="archivo" required style="font-size: 0.88rem;">
-                <button type="submit" style="background-color: #0f172a; color: white; padding: 6px 16px; border-radius: 6px; border: none; cursor: pointer;">
-                    Subir Archivo
-                </button>
-            </form>
-        </div>
-        {% endif %}
-    </div>
 </div>
 
 <!-- TARJETA DE DETALLES DEL EVENTO E INDICADORES -->
@@ -224,51 +178,6 @@ function filtrarTabla() {
         const rowText = trs[i].textContent.toLowerCase();
         trs[i].style.display = rowText.includes(filter) ? "" : "none";
     }
-}
-
-// 2. Exportación limpia a CSV (Corrige el '###' en la fecha y cédula para Excel)
-function exportarCSV() {
-    const table = document.getElementById("tablaInscritos");
-    if (!table) return;
-
-    let csv = [];
-    let csvContent = "\uFEFF"; // Carácter UTF-8 BOM para soporte correcto de eñes y acentos en Excel
-
-    const rows = table.querySelectorAll("tr");
-    rows.forEach((row, rowIndex) => {
-        if (row.style.display !== "none") {
-            const cols = row.querySelectorAll("th, td");
-            let rowData = [];
-            
-            // Recorremos omitiendo la última columna ('Acción')
-            for (let i = 0; i < cols.length - 1; i++) {
-                let text = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                text = text.replace("✅ Asistió", "Asistió").replace("⏳ Pendiente", "Pendiente");
-                
-                // Si es fila de datos (rowIndex > 0) y es Cédula (i=2) o Fecha (i=4), forzamos texto literal para Excel
-                if (rowIndex > 0 && (i === 2 || i === 4)) {
-                    rowData.push('="' + text.replace(/"/g, '""') + '"');
-                } else {
-                    rowData.push('"' + text.replace(/"/g, '""') + '"');
-                }
-            }
-            csv.push(rowData.join(";")); // Separador punto y coma ideal para regiones en español
-        }
-    });
-
-    const csvString = csv.join("\n");
-    const blob = new Blob([csvContent + csvString], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    
-    const tituloEvento = "{{ evento.titulo }}".replace(/[^a-zA-Z0-9]/g, "_").substring(0, 30);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Inscritos_${tituloEvento}.csv`);
-    link.style.visibility = "hidden";
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }
 </script>
 {% endblock %}

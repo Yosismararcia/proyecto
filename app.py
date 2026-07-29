@@ -6,7 +6,6 @@ import os
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from werkzeug.security import generate_password_hash, check_password_hash
 import time
 import csv
 from core.security import (
@@ -24,11 +23,9 @@ from werkzeug.utils import secure_filename
 # Repositorios: importamos tanto el módulo (para llamadas como evento_repo.func())
 # como sus funciones en el namespace para mantener compatibilidad con el código existente.
 import repositories.evento_repository as evento_repo
-from repositories.evento_repository import *
 import repositories.usuario_repository as usuario_repo
-from repositories.usuario_repository import *
 import repositories.inscripcion_repository as inscripcion_repo
-from repositories.inscripcion_repository import *
+
 #importacion de modulos de database por nuevas modificaciones
 from database import (
     obtener_conexion,
@@ -226,7 +223,7 @@ def redefinir_password():
         nueva_clave = request.form.get('password', '').strip()
         
         # Encriptamos la clave nueva
-        clave_hash = generate_password_hash(nueva_clave)
+        clave_hash = hash_password(nueva_clave)
 
         conexion = obtener_conexion()
         try:
@@ -394,7 +391,7 @@ def difundir_evento(evento_id):
 
     try:
         # 1. Consulta limpia a través del repositorio
-        evento = obtener_evento_difusion(evento_id)
+        evento = evento_repo.obtener_evento_difusion(evento_id)
         print(evento)
         if not evento:
             flash('El evento solicitado no existe.', 'error')
@@ -575,7 +572,7 @@ def inscribir_evento(evento_id):
         return redirect(request.referrer or url_for('inicio'))
 
     usuario_id = session['usuario_id']
-    resultado = registrar_inscripcion_segura(evento_id, usuario_id)
+    resultado = inscripcion_repo.registrar_inscripcion_segura(evento_id, usuario_id)
 
     status = resultado.get('status', 'error')
     mensaje = str(resultado.get('message', 'Ocurrió un error inesperado.'))
@@ -629,7 +626,7 @@ def ver_inscritos_evento(evento_id):
 
     # Obtenemos inscritos y los materiales cargados al repositorio
     inscritos = obtener_inscritos_evento_bd(evento_id) or []
-    materiales = obtener_materiales_repositorio(evento_id) or []  # Función de BD para traer adjuntos
+    materiales = evento_repo.obtener_materiales_repositorio(evento_id) or []  # Función de BD para traer adjuntos
 
     return render_template(
         'ver_inscritos.html', 
@@ -657,7 +654,7 @@ def ponente_ver_inscritos(evento_id):
         flash("El evento solicitado no existe.", "error")
         return redirect(url_for('mis_solicitudes'))
 
-    inscritos = obtener_inscritos_por_evento(evento_id) or []
+    inscritos = obtener_inscritos_evento_bd(evento_id) or []
     puede_subir_material = (
         rol_actual == 'administrativo' or
         usuario_id == evento.get('responsable_id') or
@@ -707,7 +704,7 @@ def detalle_evento(evento_id):
         inscripcion = obtener_inscripcion_usuario_bd(evento_id, session['usuario_id'])
 
         # Obtener los archivos cargados en el repositorio del evento
-        materiales = obtener_materiales_repositorio(evento_id) or []
+        materiales = evento_repo.obtener_materiales_repositorio(evento_id) or []
 
         puede_subir_material = (
             session.get('usuario_rol') == 'administrativo' or
@@ -1015,7 +1012,7 @@ def crear_tarea_voluntariado(evento_id):
     # Validamos que sea un usuario con permisos
     if 'usuario_id' not in session or session.get('usuario_rol') not in ['administrativo', 'ponente', 'Admin', 'Profesor', 'Administrativo']:
         flash("Acceso denegado para crear tareas.", "error")
-        return redirect(url_for('home')) # Cambia 'home' por el nombre de tu ruta principal si es diferente
+        return redirect(url_for('inicio')) # Cambia 'home' por el nombre de tu ruta principal si es diferente
     
     nombre = request.form.get('titulo_tarea')
     descripcion = request.form.get('descripcion')
@@ -1164,7 +1161,7 @@ def rechazar_propuesta(propuesta_id):
 
 @app.route('/admin/propuesta/eliminar/<int:propuesta_id>', methods=['POST'])
 def eliminar_propuesta(propuesta_id):
-    if eliminar_propuesta_estudiante(propuesta_id):
+    if inscripcion_repo.eliminar_propuesta_estudiante(propuesta_id):
         flash("Propuesta eliminada correctamente.", "success")
     else:
         flash("No se pudo eliminar la propuesta.", "danger")
@@ -1187,7 +1184,7 @@ def exportar_inscritos_csv(evento_id):
         flash("No tienes autorización para exportar esta lista.", "danger")
         return redirect(url_for('inicio'))
 
-    inscritos = obtener_inscritos_por_evento(evento_id)
+    inscritos = obtener_inscritos_evento_bd(evento_id)
 
     # Generación dinámica del archivo CSV
     output = io.StringIO()
@@ -1242,7 +1239,7 @@ def subir_material_repositorio(evento_id):
         file.save(ruta_guardado)
 
         # Guarda la referencia en base de datos (función SQL correspondiente)
-        guardar_material_db(evento_id, titulo_material, nombre_unico)
+        evento_repo.guardar_material_db(evento_id, titulo_material, nombre_unico)
         flash(" Archivo subido al repositorio correctamente.", "success")
 
     return redirect(url_for('ver_inscritos_evento', evento_id=evento_id))

@@ -62,22 +62,6 @@ def obtener_eventos_por_usuario(usuario_id):
         conexion.close()
 
 
-def obtener_inscritos_por_evento(evento_id):
-    """Devuelve la lista de usuarios inscritos en un evento específico."""
-    conexion = obtener_conexion()
-    try:
-        with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute("""
-                SELECT u.id, u.nombre, u.cedula, u.correo, u.rol, i.fecha_inscripcion
-                FROM inscripciones i
-                JOIN usuarios u ON i.usuario_id = u.id
-                WHERE i.evento_id = %s
-                ORDER BY i.fecha_inscripcion ASC;
-            """, (evento_id,))
-            return cursor.fetchall()
-    finally:
-        conexion.close()
-
 def eliminar_propuesta_estudiante(propuesta_id):
     """Elimina permanentemente una propuesta de estudiante por su ID."""
     conexion = obtener_conexion()

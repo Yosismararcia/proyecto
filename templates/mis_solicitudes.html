@@ -32,7 +32,9 @@
                         </td>
                         <td>{{ sol.espacio if sol.espacio is defined else sol.get('espacio', '') }}</td>
                         <td>
-                            {% set estado_lower = (sol.estado if sol.estado is defined else sol.get('estado', '')) | lower %}
+                            {% set estado_raw = sol.estado if sol.estado is defined else sol.get('estado', '') %}
+                            {% set estado_lower = (estado_raw or '') | lower %}
+                            
                             {% if estado_lower in ['aprobado', 'programado'] %}
                                 <mark style="background-color: #d1e7dd; color: #0f5132; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">
                                     {{ estado_lower | upper }}
@@ -62,7 +64,7 @@
                     <tr>
                         <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px 10px;">
                             <p style="margin-bottom: 15px;">Aún no has realizado ninguna solicitud de espacio.</p>
-                            <a href="/solicitar" class="button"><i class="fa-solid fa-plus"></i> Solicitar mi primer espacio</a>
+                            <a href="{{ url_for('solicitar') }}" class="button"> <!-- o el nombre de tu vista en app.py -->
                         </td>
                     </tr>
                 {% endif %}
@@ -70,4 +72,4 @@
         </table>
     </div>
 </section>
-{% endblock %}
+{% endblock %} 
