@@ -254,9 +254,11 @@ def solicitar():
         tipo_actividad = request.form.get('tipo_actividad')
         espacio_id = request.form.get('espacio_id')
         enlace_virtual = request.form.get('enlace_virtual', '')
+        descripcion = request.form.get('descripcion', '')
         fecha = request.form.get('fecha')
         hora_inicio = request.form.get('hora_inicio')
         hora_fin = request.form.get('hora_fin')
+        
         
         if not all([titulo, departamento, tipo_actividad, espacio_id, fecha, hora_inicio, hora_fin]):
             flash("❌ Por favor complete todos los campos requeridos.", "error")
@@ -279,7 +281,16 @@ def solicitar():
             return redirect(url_for('solicitar'))
         
         resultado = evento_repo.crear_solicitud_evento(
-            titulo, session['usuario_id'], tipo_actividad, espacio_id, fecha, hora_inicio, hora_fin, departamento, enlace_virtual
+            titulo=titulo,
+            responsable_id=session['usuario_id'],
+            tipo_actividad=tipo_actividad,
+            espacio_id=espacio_id,
+            fecha=fecha,
+            hora_inicio=hora_inicio,
+            hora_fin=hora_fin,
+            departamento=departamento,
+            enlace_virtual=enlace_virtual,
+            descripcion=descripcion,  # <-- Enviado a la función del repositorio
         )
 
         if resultado.get('exito'):
@@ -1171,33 +1182,55 @@ def eliminar_propuesta(propuesta_id):
 # --- 2. RUTA PARA EXPORTAR ÚNICAMENTE LOS INSCRITOS DE ESTE EVENTO ---
 @app.route('/evento/<int:evento_id>/exportar-csv')
 def exportar_inscritos_csv(evento_id):
-    usuario_id = session.get('usuario_id')
-    rol = str(session.get('usuario_rol') or session.get('rol') or '').lower()
-    evento = obtener_detalle_evento_bd(evento_id)
+  usuario_id = session.get('usuario_id')
+  rol = str(session.get('usuario_rol') or session.get('rol') or '').lower()
+  evento = obtener_detalle_evento_bd(evento_id)
 
-    if not evento:
-        flash("El evento no existe o ya no está disponible.", "danger")
-        return redirect(url_for('inicio'))
+  if not evento:
+    flash('El evento no existe o ya no está disponible.', 'danger')
+    return redirect(url_for('inicio'))
 
-    profesor_encargado_id = evento.get('responsable_id') or evento.get('usuario_id') or evento.get('organizador_id')
-    if rol != 'administrativo' and usuario_id != profesor_encargado_id:
-        flash("No tienes autorización para exportar esta lista.", "danger")
-        return redirect(url_for('inicio'))
+  profesor_encargado_id = (
+      evento.get('responsable_id')
+      or evento.get('usuario_id')
+      or evento.get('organizador_id')
+  )
+  if rol != 'administrativo' and usuario_id != profesor_encargado_id:
+    flash('No tienes autorización para exportar esta lista.', 'danger')
+    return redirect(url_for('inicio'))
 
-    inscritos = obtener_inscritos_evento_bd(evento_id)
+  inscritos = obtener_inscritos_evento_bd(evento_id)
 
-    # Generación dinámica del archivo CSV
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['#', 'Nombre Completo', 'Cédula', 'Correo Electrónico', 'Fecha Inscripción', 'Estado'])
+  output = io.StringIO()
+  # Escribir BOM UTF-8 para garantizar legibilidad correcta de tildes en Excel
+  output.write('\ufeff')
 
-    for i, p in enumerate(inscritos, start=1):
-        writer.writerow([i, p.get('nombre'), p.get('cedula'), p.get('correo'), p.get('fecha_inscripcion'), p.get('estado')])
+  writer = csv.writer(output)
+  writer.writerow([
+      '#',
+      'Nombre Completo',
+      'Cédula',
+      'Correo Electrónico',
+      'Fecha Inscripción',
+      'Estado',
+  ])
 
-    response = make_response(output.getvalue())
-    response.headers["Content-Disposition"] = f"attachment; filename=inscritos_evento_{evento_id}.csv"
-    response.headers["Content-type"] = "text/csv; charset=utf-8"
-    return response
+  for i, p in enumerate(inscritos, start=1):
+    writer.writerow([
+        i,
+        p.get('nombre'),
+        p.get('cedula'),
+        p.get('correo'),
+        p.get('fecha_inscripcion'),
+        p.get('estado'),
+    ])
+
+  response = make_response(output.getvalue())
+  response.headers['Content-Disposition'] = (
+      f'attachment; filename=inscritos_evento_{evento_id}.csv'
+  )
+  response.headers['Content-type'] = 'text/csv; charset=utf-8'
+  return response
 
 UPLOAD_FOLDER = 'static/uploads/repositorio'
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'ppt', 'pptx', 'zip', 'rar'}
