@@ -135,21 +135,24 @@ def crear_solicitud_evento(titulo, responsable_id, tipo_actividad, espacio_id, f
     conexion = obtener_conexion()
     try:
         with conexion.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO eventos (titulo, departamento, tipo_actividad, fecha, hora_inicio, hora_fin, estado, espacio_id, enlace_virtual, responsable_id, descripcion)
-                VALUES (%s, %s, %s, %s, %s, %s, 'pendiente', %s, %s, %s, %s);
-            """, (
-                titulo_limpio, 
-                departamento_limpio, 
-                tipo_actividad, 
-                fecha, 
-                hora_inicio, 
-                hora_fin, 
-                espacio_id, 
-                enlace_virtual, 
+            cursor.execute(
+                """
+                    INSERT INTO eventos (titulo, departamento, tipo_actividad, fecha, hora_inicio, hora_fin, estado, espacio_id, enlace_virtual, responsable_id, descripcion)
+                    VALUES (%s, %s, %s, %s, %s, %s, 'pendiente', %s, %s, %s, %s);
+                """,
+            (
+                titulo_limpio,
+                departamento_limpio,
+                tipo_actividad,
+                fecha,
+                hora_inicio,
+                hora_fin,
+                espacio_id,
+                enlace_virtual,
                 responsable_id,
-                descripcion_limpia
-            ))
+                descripcion_limpia,
+            ),
+        )
         conexion.commit()
         return {"exito": True, "mensaje": "Solicitud creada exitosamente."}
         
