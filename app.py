@@ -131,7 +131,7 @@ def registro():
 
         #VALIDACION DE FORMATO DE CEDULA
         if not validar_cedula_format(cedula_clean):
-            flash("❌ Error: La cédula ingresada no es válida. Debe contener números válidos (Ej: V-12345678 o 12345678).", "error")
+            flash("❌ Error: La cédula ingresada no es válida. Debe contener números válidos (Ej: V-12345678).", "error")
             return redirect(url_for('registro'))
 
         if rol in ['ponente', 'profesor', 'administrativo']:
