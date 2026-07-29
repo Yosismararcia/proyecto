@@ -7,9 +7,14 @@ def validar_cedula_format(cedula):
     """
     Valida que la cédula tenga un formato venezolano válido (Ej: V-12345678 o E-87654321).
     """
+    if not cedula:
+        return False
+
     cedula_limpia = clean_input_strict(cedula).upper()
+
     patron = r'^(V|E|J|G)-\d{5,9}$'
-    return bool(re.match(patron, cedula_limpia)) if 're' in globals() else True
+
+    return bool(re.match(patron, cedula_limpia))
 
 def puede_editar_propuesta(estado_solicitud):
     """
