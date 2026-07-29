@@ -17,7 +17,7 @@ from core.security import (
     verificar_password,
     generar_codigo_certificado
 )
-from core.validators import validar_cedula_institucional
+from core.validators import validar_cedula_institucional, validar_cedula_format
 import io
 from werkzeug.utils import secure_filename
 
@@ -127,6 +127,11 @@ def registro():
 
         if not cedula_clean or not nombre_clean:
             flash("❌ Error: Se detectaron caracteres no permitidos en el formulario.", "error")
+            return redirect(url_for('registro'))
+
+        #VALIDACION DE FORMATO DE CEDULA
+        if not validar_cedula_format(cedula_clean):
+            flash("❌ Error: La cédula ingresada no es válida. Debe contener números válidos (Ej: V-12345678 o 12345678).", "error")
             return redirect(url_for('registro'))
 
         if rol in ['ponente', 'profesor', 'administrativo']:
